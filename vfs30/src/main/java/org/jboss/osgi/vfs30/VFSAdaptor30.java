@@ -125,7 +125,7 @@ public class VFSAdaptor30 implements VFSAdaptor
       VirtualFileAdaptor30 adaptor = (VirtualFileAdaptor30)absFile;
       return adaptor.getDelegate();
    }
-
+   
    static void unregister(VirtualFileAdaptor30 absFile)
    {
       registry.remove(absFile.getDelegate());

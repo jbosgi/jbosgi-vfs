@@ -106,7 +106,7 @@ public interface VirtualFile
     * @throws IllegalArgumentException if the path is null
     * @throws IllegalStateException if the file is closed or it is a leaf node
     */
-   VirtualFile getChild(String string) throws IOException;
+   VirtualFile getChild(String path) throws IOException;
 
    /**
     * Get all the children recursively<p>
