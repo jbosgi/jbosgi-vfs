@@ -62,7 +62,6 @@
   <!-- Modules -->
   <modules>
     <module>api</module>
-    <module>vfs21</module>
     <module>vfs30</module>
   </modules>
   
