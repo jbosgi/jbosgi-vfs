@@ -27,7 +27,7 @@
   <parent>
     <groupId>org.jboss.osgi</groupId>
     <artifactId>jboss-osgi-parent</artifactId>
-    <version>1.0.7-SNAPSHOT</version>
+    <version>1.0.9</version>
   </parent>
 
   <!-- Source Control -->
@@ -39,7 +39,7 @@
   
   <!-- Properties -->
   <properties>
-    <version.jboss.shrinkwrap>1.0.0-alpha-9</version.jboss.shrinkwrap>
+    <version.jboss.shrinkwrap>1.0.0-alpha-11</version.jboss.shrinkwrap>
     <version.osgi>4.2.0</version.osgi>
   </properties>
 

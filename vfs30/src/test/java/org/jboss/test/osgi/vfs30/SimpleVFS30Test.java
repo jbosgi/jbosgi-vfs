@@ -43,8 +43,8 @@ import java.util.jar.Manifest;
 import org.jboss.osgi.vfs.AbstractVFS;
 import org.jboss.osgi.vfs.VFSUtils;
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.shrinkwrap.api.Asset;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.osgi.vfs30.bundle.SimpleActivator;
@@ -67,7 +67,7 @@ public class SimpleVFS30Test
    @BeforeClass
    public static void beforeClass() throws IOException
    {
-      JavaArchive archive = ShrinkWrap.create("example-simple.jar", JavaArchive.class);
+      JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-simple.jar");
       archive.addClass(SimpleActivator.class);
       Asset asset = new Asset()
       {

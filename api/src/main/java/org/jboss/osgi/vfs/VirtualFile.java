@@ -109,7 +109,7 @@ public interface VirtualFile
    VirtualFile getChild(String path) throws IOException;
 
    /**
-    * Get all the children recursively<p>
+    * Get all children recursively<p>
     *
     * This always uses {@link VisitorAttributes#RECURSE}
     *
@@ -118,6 +118,17 @@ public interface VirtualFile
     * @throws IllegalStateException if the file is closed
     */
    List<VirtualFile> getChildrenRecursively() throws IOException;
+   
+   /**
+    * Get the children<p>
+    *
+    * This always uses {@link VisitorAttributes#RECURSE}
+    *
+    * @return the children
+    * @throws IOException for any problem accessing the virtual file system
+    * @throws IllegalStateException if the file is closed
+    */
+   List<VirtualFile> getChildren() throws IOException;
    
    /**
     * Returns entries in this bundle and its attached fragments. This bundle's

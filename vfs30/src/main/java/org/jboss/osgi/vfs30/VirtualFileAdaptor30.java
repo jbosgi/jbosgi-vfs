@@ -148,7 +148,15 @@ class VirtualFileAdaptor30 implements VirtualFile
       List<VirtualFile> files = new ArrayList<VirtualFile>();
       for (org.jboss.vfs.VirtualFile child : delegate.getChildrenRecursively())
          files.add(new VirtualFileAdaptor30(child));
+      return Collections.unmodifiableList(files);
+   }
 
+   @Override
+   public List<VirtualFile> getChildren() throws IOException
+   {
+      List<VirtualFile> files = new ArrayList<VirtualFile>();
+      for (org.jboss.vfs.VirtualFile child : delegate.getChildren())
+         files.add(new VirtualFileAdaptor30(child));
       return Collections.unmodifiableList(files);
    }
 
