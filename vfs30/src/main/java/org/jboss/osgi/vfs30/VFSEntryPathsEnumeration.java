@@ -31,7 +31,7 @@ import org.jboss.vfs.VirtualFile;
 
 /**
  * An enumeration of VFS entry paths.
- * 
+ *
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
@@ -43,7 +43,7 @@ class VFSEntryPathsEnumeration implements Enumeration<String>
 
    /**
     * Create a new VFSEntryPathsEnumeration.
-    * 
+    *
     * @param root the root file
     * @param file the file to enumerate
     * @throws IOException for any error
@@ -57,7 +57,7 @@ class VFSEntryPathsEnumeration implements Enumeration<String>
 
       String rootPath = root.getPathName();
       ArrayList<String> paths = new ArrayList<String>();
-      
+
       String fixedPath = fixPath(rootPath, file);
       if (fixedPath != null)
          paths.add(fixedPath);
@@ -95,7 +95,7 @@ class VFSEntryPathsEnumeration implements Enumeration<String>
       if (file.isDirectory() && result.endsWith("/") == false)
          result += "/";
 
-      // The returned paths are all relative to the root of this bundle and must not begin with "/". 
+      // The returned paths are all relative to the root of this bundle and must not begin with "/".
       if (result.startsWith("/"))
          result = result.substring(1);
 

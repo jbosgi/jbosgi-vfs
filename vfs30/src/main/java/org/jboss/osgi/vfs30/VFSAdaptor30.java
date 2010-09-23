@@ -1,24 +1,24 @@
 /*
-* JBoss, Home of Professional Open Source
-* Copyright 2006, JBoss Inc., and individual contributors as indicated
-* by the @authors tag. See the copyright.txt in the distribution for a
-* full listing of individual contributors.
-*
-* This is free software; you can redistribute it and/or modify it
-* under the terms of the GNU Lesser General Public License as
-* published by the Free Software Foundation; either version 2.1 of
-* the License, or (at your option) any later version.
-*
-* This software is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-* Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public
-* License along with this software; if not, write to the Free
-* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-* 02110-1301 USA, or see the FSF site: http://www.fsf.org.
-*/
+ * JBoss, Home of Professional Open Source
+ * Copyright 2006, JBoss Inc., and individual contributors as indicated
+ * by the @authors tag. See the copyright.txt in the distribution for a
+ * full listing of individual contributors.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
 package org.jboss.osgi.vfs30;
 
 import java.io.Closeable;
@@ -28,7 +28,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.WeakHashMap;
 
 import org.jboss.osgi.vfs.VFSAdaptor;
 import org.jboss.osgi.vfs.VirtualFile;
@@ -36,14 +36,14 @@ import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
 
 /**
- * An adaptor to the jboss-vfs-3.0.x VFS. 
- * 
+ * An adaptor to the jboss-vfs-3.0.x VFS.
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
 public class VFSAdaptor30 implements VFSAdaptor
 {
-   private static Map<Object, VirtualFile> registry = new ConcurrentHashMap<Object, VirtualFile>();
+   private static Map<org.jboss.vfs.VirtualFile, VirtualFile> registry = new WeakHashMap<org.jboss.vfs.VirtualFile, VirtualFile>();
    private static Set<String> suffixes = new HashSet<String>();
    static
    {
@@ -55,7 +55,7 @@ public class VFSAdaptor30 implements VFSAdaptor
    {
       try
       {
-         org.jboss.vfs.VirtualFile vfsFile = org.jboss.vfs.VFS.getChild(url);
+         org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(url);
          VirtualFileAdaptor30 absFile = (VirtualFileAdaptor30)adapt(vfsFile);
          return absFile;
       }
@@ -79,13 +79,14 @@ public class VFSAdaptor30 implements VFSAdaptor
          return absFile;
 
       // Accept the file for mounting
-      Closeable mount = null;
-      if (acceptForMount(vfsFile) == true)
+      absFile = new VirtualFileAdaptor30(vfsFile);
+      if (acceptForMount(vfsFile))
       {
          try
          {
             TempFileProvider tmp = TempFileProvider.create("osgimount-", null);
-            mount = VFS.mountZip(vfsFile, vfsFile, tmp);
+            Closeable mount = VFS.mountZip(vfsFile, vfsFile, tmp);
+            absFile = new VirtualFileAdaptor30(vfsFile, mount);
          }
          catch (IOException ex)
          {
@@ -94,7 +95,6 @@ public class VFSAdaptor30 implements VFSAdaptor
       }
 
       // Register the VirtualFile abstraction
-      absFile = new VirtualFileAdaptor30(vfsFile, mount);
       registry.put(vfsFile, absFile);
       return absFile;
    }
@@ -123,11 +123,11 @@ public class VFSAdaptor30 implements VFSAdaptor
          return null;
 
       VirtualFileAdaptor30 adaptor = (VirtualFileAdaptor30)absFile;
-      return adaptor.getDelegate();
+      return adaptor.getVirtualFile();
    }
-   
+
    static void unregister(VirtualFileAdaptor30 absFile)
    {
-      registry.remove(absFile.getDelegate());
+      registry.remove(absFile.getVirtualFile());
    }
 }

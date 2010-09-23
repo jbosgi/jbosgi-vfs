@@ -41,68 +41,68 @@ import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualJarInputStream;
 
 /**
- * An adaptor to the jboss-vfs-3.0.x VirtualFile. 
- * 
+ * An adaptor to the jboss-vfs-3.0.x VirtualFile.
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
 class VirtualFileAdaptor30 implements VirtualFile
 {
-   private org.jboss.vfs.VirtualFile delegate;
+   private final org.jboss.vfs.VirtualFile vfsFile;
    private Closeable mount;
    private TempDir streamDir;
    private File streamFile;
 
-   VirtualFileAdaptor30(org.jboss.vfs.VirtualFile root, Closeable mount)
+   VirtualFileAdaptor30(org.jboss.vfs.VirtualFile vfsFile, Closeable mount)
    {
-      this(root);
+      this(vfsFile);
       this.mount = mount;
    }
 
-   VirtualFileAdaptor30(org.jboss.vfs.VirtualFile delegate)
+   VirtualFileAdaptor30(org.jboss.vfs.VirtualFile vfsFile)
    {
-      if (delegate == null)
-         throw new IllegalStateException("Null delegate");
-      this.delegate = delegate;
+      if (vfsFile == null)
+         throw new IllegalStateException("Null vfsFile");
+      this.vfsFile = vfsFile;
    }
 
-   org.jboss.vfs.VirtualFile getDelegate()
+   public org.jboss.vfs.VirtualFile getVirtualFile()
    {
-      return delegate;
+      return vfsFile;
    }
 
    public String getName()
    {
-      return delegate.getName();
+      return vfsFile.getName();
    }
 
    public String getPathName()
    {
-      return delegate.getPathName();
+      return vfsFile.getPathName();
    }
 
    public boolean isFile() throws IOException
    {
-      return delegate.isFile();
+      return vfsFile.isFile();
    }
 
    public boolean isDirectory() throws IOException
    {
-      return delegate.isDirectory();
+      return vfsFile.isDirectory();
    }
 
    @Override
    public URL toURL() throws IOException
    {
-      URL url = delegate.toURL();
+      URL url = vfsFile.toURL();
       return url;
    }
 
    @Override
    public URL getStreamURL() throws IOException
    {
-      if (delegate.isFile() == true)
-         return delegate.toURL();
+      if (vfsFile.isFile() == true)
+         return vfsFile.toURL();
 
       if (streamFile == null)
       {
@@ -111,7 +111,7 @@ class VirtualFileAdaptor30 implements VirtualFile
          streamFile = streamDir.getFile(getName());
          JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(streamFile));
 
-         VirtualJarInputStream jarIn = (VirtualJarInputStream)delegate.openStream();
+         VirtualJarInputStream jarIn = (VirtualJarInputStream)vfsFile.openStream();
          ZipEntry nextEntry = jarIn.getNextEntry();
          while (nextEntry != null)
          {
@@ -128,14 +128,14 @@ class VirtualFileAdaptor30 implements VirtualFile
    @Override
    public VirtualFile getParent()
    {
-      org.jboss.vfs.VirtualFile parent = delegate.getParent();
+      org.jboss.vfs.VirtualFile parent = vfsFile.getParent();
       return parent != null ? new VirtualFileAdaptor30(parent) : null;
    }
 
    @Override
    public VirtualFile getChild(String path) throws IOException
    {
-      org.jboss.vfs.VirtualFile child = delegate.getChild(path);
+      org.jboss.vfs.VirtualFile child = vfsFile.getChild(path);
       if (child.exists() == false)
          return null;
 
@@ -146,7 +146,7 @@ class VirtualFileAdaptor30 implements VirtualFile
    public List<VirtualFile> getChildrenRecursively() throws IOException
    {
       List<VirtualFile> files = new ArrayList<VirtualFile>();
-      for (org.jboss.vfs.VirtualFile child : delegate.getChildrenRecursively())
+      for (org.jboss.vfs.VirtualFile child : vfsFile.getChildrenRecursively())
          files.add(new VirtualFileAdaptor30(child));
       return Collections.unmodifiableList(files);
    }
@@ -155,7 +155,7 @@ class VirtualFileAdaptor30 implements VirtualFile
    public List<VirtualFile> getChildren() throws IOException
    {
       List<VirtualFile> files = new ArrayList<VirtualFile>();
-      for (org.jboss.vfs.VirtualFile child : delegate.getChildren())
+      for (org.jboss.vfs.VirtualFile child : vfsFile.getChildren())
          files.add(new VirtualFileAdaptor30(child));
       return Collections.unmodifiableList(files);
    }
@@ -172,11 +172,11 @@ class VirtualFileAdaptor30 implements VirtualFile
       if (path.startsWith("/"))
          path = path.substring(1);
 
-      org.jboss.vfs.VirtualFile child = delegate.getChild(path);
+      org.jboss.vfs.VirtualFile child = vfsFile.getChild(path);
       if (child.exists() == false)
          return null;
 
-      return new VFSFindEntriesEnumeration(delegate, child, pattern, recurse);
+      return new VFSFindEntriesEnumeration(vfsFile, child, pattern, recurse);
    }
 
    @Override
@@ -188,11 +188,16 @@ class VirtualFileAdaptor30 implements VirtualFile
       if (path.startsWith("/"))
          path = path.substring(1);
 
-      org.jboss.vfs.VirtualFile child = delegate.getChild(path);
+      org.jboss.vfs.VirtualFile child;
+      if (path.length() > 0)
+         child = vfsFile.getChild(path);
+      else
+         child = vfsFile;
+
       if (child.exists() == false)
          return null;
 
-      return new VFSEntryPathsEnumeration(delegate, child);
+      return new VFSEntryPathsEnumeration(vfsFile, child);
    }
 
    @Override
@@ -201,7 +206,7 @@ class VirtualFileAdaptor30 implements VirtualFile
       if (mount != null)
          return getStreamURL().openStream();
 
-      return delegate.openStream();
+      return vfsFile.openStream();
    }
 
    @Override
@@ -231,18 +236,18 @@ class VirtualFileAdaptor30 implements VirtualFile
    @Override
    public boolean equals(Object obj)
    {
-      return delegate.equals(obj);
+      return vfsFile.equals(obj);
    }
 
    @Override
    public int hashCode()
    {
-      return delegate.hashCode();
+      return vfsFile.hashCode();
    }
 
    @Override
    public String toString()
    {
-      return delegate.toString();
+      return vfsFile.toString();
    }
 }
