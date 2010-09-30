@@ -21,6 +21,7 @@
 */
 package org.jboss.osgi.vfs;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,13 +29,18 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
- * A subset of VFS util functionality that is used by the OSGi layer. 
+ * Some VFS utilities taht are used by the OSGi layer. 
  * 
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
-public class VFSUtils
+public final class VFSUtils
 {
+   // Hide ctor
+   private VFSUtils()
+   {
+   }
+
    public static Manifest getManifest(VirtualFile archive) throws IOException
    {
       if (archive == null)
@@ -82,5 +88,16 @@ public class VFSUtils
       {
          os.flush();
       }
+   }
+
+   public static String getPathFromClassName(final String className)
+   {
+      int idx = className.lastIndexOf('.');
+      return idx > -1 ? getPathFromPackageName(className.substring(0, idx)) : "";
+   }
+
+   public static String getPathFromPackageName(String packageName)
+   {
+      return packageName.replace('.', File.separatorChar);
    }
 }
