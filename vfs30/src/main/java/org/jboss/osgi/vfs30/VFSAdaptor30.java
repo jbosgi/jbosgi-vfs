@@ -23,6 +23,7 @@ package org.jboss.osgi.vfs30;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
@@ -51,7 +52,42 @@ public class VFSAdaptor30 implements VFSAdaptor
       suffixes.add(".war");
    }
 
-   public VirtualFile getRoot(URL url) throws IOException
+   private static final TempFileProvider tmpProvider;
+   static
+   {
+      try
+      {
+         tmpProvider = TempFileProvider.create("osgitmp-", null);
+      }
+      catch (IOException ex)
+      {
+         throw new IllegalStateException("Cannot create VFS temp file provider", ex);
+      }
+      
+      Thread shutdownThread = new Thread("vfs-shutdown")
+      {
+         @Override
+         public void run()
+         {
+            try
+            {
+               tmpProvider.close();
+            }
+            catch (IOException ex)
+            {
+               throw new IllegalStateException("Cannot close VFS temp file provider", ex);
+            }
+         }
+      };
+      Runtime.getRuntime().addShutdownHook(shutdownThread);
+   }
+   
+   static TempFileProvider getTempFileProvider()
+   {
+      return tmpProvider;
+   }
+
+   public VirtualFile toVirtualFile(URL url) throws IOException
    {
       try
       {
@@ -62,6 +98,25 @@ public class VFSAdaptor30 implements VFSAdaptor
       catch (URISyntaxException ex)
       {
          throw new IOException(ex);
+      }
+   }
+
+   @Override
+   public VirtualFile toVirtualFile(String name, InputStream inputStream)
+   {
+      if (inputStream == null)
+         return null;
+
+      try
+      {
+         org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(name);
+         Closeable mount = VFS.mountZip(inputStream, name, vfsFile, tmpProvider);
+         VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, mount);
+         return absFile;
+      }
+      catch (IOException ex)
+      {
+         throw new IllegalStateException("Cannot mount input stream", ex);
       }
    }
 
@@ -84,8 +139,7 @@ public class VFSAdaptor30 implements VFSAdaptor
       {
          try
          {
-            TempFileProvider tmp = TempFileProvider.create("osgimount-", null);
-            Closeable mount = VFS.mountZip(vfsFile, vfsFile, tmp);
+            Closeable mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
             absFile = new VirtualFileAdaptor30(vfsFile, mount);
          }
          catch (IOException ex)

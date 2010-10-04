@@ -22,13 +22,14 @@
 package org.jboss.osgi.vfs;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
  * The basic adaptor for the VFS that needs to be implemented for a specific jboss-vfs version.
- * 
+ *
  * This abstraction should be removed once we settle on a single jboss-vfs version.
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
@@ -41,7 +42,15 @@ public interface VFSAdaptor
     * @throws IOException if there is a problem accessing the VFS
     * @throws IllegalArgumentException if the rootURL
     */
-   VirtualFile getRoot(URL url) throws IOException;
+   VirtualFile toVirtualFile(URL url) throws IOException;
+
+   /**
+    * Adapt an InputStream to a virtual file.
+    * @param name TODO
+    * @param inputStream The input stream
+    * @return The VirtualFile abstraction
+    */
+   VirtualFile toVirtualFile(String name, InputStream inputStream);
 
    /**
     * Adapt a concrete instance of a jboss-vfs VirtualFile.

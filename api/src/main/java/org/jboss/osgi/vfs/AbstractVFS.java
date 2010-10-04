@@ -22,70 +22,62 @@
 package org.jboss.osgi.vfs;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
  * The AbstractVFS is the entry point for VFS abstraction used by the OSGi layer.
- * 
+ *
  * This abstraction should be removed once we settle on a single jboss-vfs version.
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
 public abstract class AbstractVFS
 {
    private static VFSAdaptor adaptor;
-   
-   public static VirtualFile getRoot(URL url) throws IOException
+
+   public static VirtualFile toVirtualFile(URL url) throws IOException
    {
-      return getVFSAdaptor().getRoot(url);
+      return getVFSAdaptor().toVirtualFile(url);
+   }
+
+   public static VirtualFile toVirtualFile(String name, InputStream inputStream)
+   {
+      return getVFSAdaptor().toVirtualFile(name, inputStream);
    }
 
    public static VirtualFile adapt(Object virtualFile)
    {
       return getVFSAdaptor().adapt(virtualFile);
    }
-   
+
    public static Object adapt(VirtualFile virtualFile)
    {
       return getVFSAdaptor().adapt(virtualFile);
    }
-   
+
    @SuppressWarnings("unchecked")
-   private static VFSAdaptor getVFSAdaptor() 
+   private static VFSAdaptor getVFSAdaptor()
    {
       if (adaptor == null)
       {
          Class<VFSAdaptor> adaptorClass = null;
-         
-         // Try to load the jboss-vfs-2.1.x adaptor
+
+         // Try to load the jboss-vfs-3.0.x adaptor
          try
          {
-            String adaptorName = "org.jboss.osgi.vfs21.VFSAdaptor21";
+            String adaptorName = "org.jboss.osgi.vfs30.VFSAdaptor30";
             adaptorClass = (Class<VFSAdaptor>)AbstractVFS.class.getClassLoader().loadClass(adaptorName);
          }
          catch (ClassNotFoundException e)
          {
             // ignore
          }
-         
-         // Try to load the jboss-vfs-3.0.x adaptor
-         if (adaptorClass == null)
-         {
-            try
-            {
-               String adaptorName = "org.jboss.osgi.vfs30.VFSAdaptor30";
-               adaptorClass = (Class<VFSAdaptor>)AbstractVFS.class.getClassLoader().loadClass(adaptorName);
-            }
-            catch (ClassNotFoundException e)
-            {
-               // ignore
-            }
-         }
-         
+
          if (adaptorClass == null)
             throw new IllegalStateException("Cannot load VFS adaptor");
-         
+
          try
          {
             adaptor = adaptorClass.newInstance();
@@ -98,4 +90,3 @@ public abstract class AbstractVFS
       return adaptor;
    }
 }
-

@@ -26,9 +26,6 @@ package org.jboss.test.osgi.vfs30;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -41,14 +38,14 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
 import org.jboss.osgi.vfs.AbstractVFS;
-import org.jboss.osgi.vfs.VFSUtils;
 import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.osgi.vfs30.bundle.SimpleActivator;
-import org.junit.AfterClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.framework.Constants;
@@ -61,13 +58,13 @@ import org.osgi.framework.Constants;
  */
 public class SimpleVFS30Test
 {
-   private static File archiveFile;
-   private static VirtualFile virtualFile;
+   private static JavaArchive archive;
+   private VirtualFile virtualFile;
    
    @BeforeClass
    public static void beforeClass() throws IOException
    {
-      JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-simple.jar");
+      archive = ShrinkWrap.create(JavaArchive.class, "example-simple.jar");
       archive.addClass(SimpleActivator.class);
       Asset asset = new Asset()
       {
@@ -86,23 +83,15 @@ public class SimpleVFS30Test
          }
       };
       archive.add(asset, JarFile.MANIFEST_NAME);
-
-      // Convert archive to file URL 
-      ZipExporter exporter = archive.as(ZipExporter.class);
-      archiveFile = File.createTempFile("archive_", ".jar");
-      exporter.exportZip(archiveFile, true);
-      archiveFile.deleteOnExit();
-      
-      FileInputStream fis = new FileInputStream(archiveFile);
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      VFSUtils.copyStream(fis, baos);
-      
-      virtualFile = AbstractVFS.getRoot(archiveFile.toURI().toURL());
    }
    
-   @AfterClass
-   public static void afterClass() throws IOException
-   {
+   @Before
+   public void setUp(){
+      virtualFile = toVirtualFile(archive);
+   }
+   
+   @After
+   public void tearDown(){
       if (virtualFile != null)
          virtualFile.close();
    }
@@ -119,7 +108,7 @@ public class SimpleVFS30Test
       String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
       assertEquals("example-simple", symbolicName);
    }
-   
+
    @Test
    public void testManifestURLAccess() throws Exception
    {
@@ -191,5 +180,12 @@ public class SimpleVFS30Test
       Attributes attributes = manifest.getMainAttributes();
       String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
       assertEquals("example-simple", symbolicName);
+   }
+
+   private VirtualFile toVirtualFile(JavaArchive archive)
+   {
+      ZipExporter exporter = archive.as(ZipExporter.class);
+      InputStream inputStream = exporter.exportZip();
+      return AbstractVFS.toVirtualFile(archive.getName(), inputStream);
    }
 }

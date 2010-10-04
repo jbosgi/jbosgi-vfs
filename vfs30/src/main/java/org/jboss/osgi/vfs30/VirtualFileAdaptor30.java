@@ -36,7 +36,6 @@ import java.util.zip.ZipEntry;
 
 import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.vfs.TempDir;
-import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualJarInputStream;
 
@@ -106,11 +105,10 @@ class VirtualFileAdaptor30 implements VirtualFile
 
       if (streamFile == null)
       {
-         TempFileProvider tmpProvider = TempFileProvider.create("osgiurl-", null);
-         streamDir = tmpProvider.createTempDir(getName());
+         streamDir = VFSAdaptor30.getTempFileProvider().createTempDir("urlstream");
          streamFile = streamDir.getFile(getName());
+         
          JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(streamFile));
-
          VirtualJarInputStream jarIn = (VirtualJarInputStream)vfsFile.openStream();
          ZipEntry nextEntry = jarIn.getNextEntry();
          while (nextEntry != null)
@@ -216,20 +214,10 @@ class VirtualFileAdaptor30 implements VirtualFile
       VFSAdaptor30.unregister(this);
       if (streamFile != null)
       {
+         File streamParent = streamFile.getParentFile();
          streamFile.delete();
+         streamParent.delete();
          streamFile = null;
-      }
-      try
-      {
-         if (streamDir != null)
-         {
-            streamDir.close();
-            streamDir = null;
-         }
-      }
-      catch (IOException ex)
-      {
-         // ignore
       }
    }
 
