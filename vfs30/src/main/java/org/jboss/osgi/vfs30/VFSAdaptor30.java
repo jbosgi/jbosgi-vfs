@@ -109,7 +109,7 @@ public class VFSAdaptor30 implements VFSAdaptor
 
       try
       {
-         org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(name);
+         org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(name + "-" + System.currentTimeMillis());
          Closeable mount = VFS.mountZip(inputStream, name, vfsFile, tmpProvider);
          VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, mount);
          return absFile;
