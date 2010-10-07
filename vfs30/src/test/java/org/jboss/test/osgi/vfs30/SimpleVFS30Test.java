@@ -52,7 +52,7 @@ import org.osgi.framework.Constants;
 
 /**
  * A test that verifies the VFS30 abstraction.
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 11-Mar-2010
  */
@@ -60,7 +60,7 @@ public class SimpleVFS30Test
 {
    private static JavaArchive archive;
    private VirtualFile virtualFile;
-   
+
    @BeforeClass
    public static void beforeClass() throws IOException
    {
@@ -84,24 +84,26 @@ public class SimpleVFS30Test
       };
       archive.add(asset, JarFile.MANIFEST_NAME);
    }
-   
+
    @Before
-   public void setUp(){
+   public void setUp()
+   {
       virtualFile = toVirtualFile(archive);
    }
-   
+
    @After
-   public void tearDown(){
+   public void tearDown() throws IOException
+   {
       if (virtualFile != null)
          virtualFile.close();
    }
-   
+
    @Test
    public void testManifestAccess() throws Exception
    {
       VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
       assertNotNull("Manifest not null", child);
-      
+
       Manifest manifest = new Manifest();
       manifest.read(child.openStream());
       Attributes attributes = manifest.getMainAttributes();
@@ -114,25 +116,25 @@ public class SimpleVFS30Test
    {
       VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
       assertNotNull("Manifest not null", child);
-      
+
       URL childURL = child.toURL();
       InputStream is = childURL.openStream();
-      
+
       Manifest manifest = new Manifest();
       manifest.read(is);
       Attributes attributes = manifest.getMainAttributes();
       String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
       assertEquals("example-simple", symbolicName);
    }
-   
+
    @Test
    public void testGetEntryPaths() throws Exception
    {
       Set<String> actual = new HashSet<String>();
       Enumeration<String> en = virtualFile.getEntryPaths("/");
-      while(en.hasMoreElements())
+      while (en.hasMoreElements())
          actual.add(en.nextElement());
-      
+
       Set<String> expected = new HashSet<String>();
       expected.add("org/");
       expected.add("org/jboss/");
@@ -145,21 +147,21 @@ public class SimpleVFS30Test
       expected.add("META-INF/MANIFEST.MF");
       assertEquals(expected, actual);
    }
-   
+
    @Test
    public void testFindEntries() throws Exception
    {
       Set<String> actual = new HashSet<String>();
       Enumeration<URL> en = virtualFile.findEntries("/", null, true);
-      while(en.hasMoreElements())
+      while (en.hasMoreElements())
          actual.add(en.nextElement().toExternalForm());
-      
+
       Set<String> expected = new HashSet<String>();
       expected.add(virtualFile.toURL() + "org/jboss/test/osgi/vfs30/bundle/SimpleActivator.class");
       expected.add(virtualFile.toURL() + "META-INF/MANIFEST.MF");
       assertEquals(expected, actual);
    }
-   
+
    @Test
    public void testStreamURLAccess() throws Exception
    {
@@ -170,7 +172,7 @@ public class SimpleVFS30Test
       String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
       assertEquals("example-simple", symbolicName);
    }
-   
+
    @Test
    public void testStreamAccess() throws Exception
    {

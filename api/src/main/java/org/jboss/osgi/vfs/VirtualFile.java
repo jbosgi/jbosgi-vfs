@@ -21,6 +21,7 @@
 */
 package org.jboss.osgi.vfs;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -29,14 +30,14 @@ import java.util.Enumeration;
 import java.util.List;
 
 /**
- * A basic abstraction of a VirtualFile used by the OSGi layer. 
- * 
+ * A basic abstraction of a VirtualFile used by the OSGi layer.
+ *
  * This abstraction should be removed once we settle on a single jboss-vfs version.
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
-public interface VirtualFile
+public interface VirtualFile extends Closeable
 {
    /**
     * Get the simple VF name (X.java)
@@ -45,7 +46,7 @@ public interface VirtualFile
     * @throws IllegalStateException if the file is closed
     */
    String getName();
-   
+
    /**
     * Get the VFS relative path name (org/jboss/X.java)
     *
@@ -53,7 +54,7 @@ public interface VirtualFile
     * @throws IllegalStateException if the file is closed
     */
    String getPathName();
-   
+
    /**
     * Whether it is a file in the VFS.
     *
@@ -62,7 +63,7 @@ public interface VirtualFile
     * @throws IllegalStateException if the file is closed
     */
    boolean isFile() throws IOException;
-   
+
    /**
     * Whether it is a directory in the VFS.
     *
@@ -71,7 +72,7 @@ public interface VirtualFile
     * @throws IllegalStateException if the file is closed
     */
    boolean isDirectory() throws IOException;
-   
+
    /**
     * Get the VF URL (vfs:/root/org/jboss/X.java)
     *
@@ -83,7 +84,7 @@ public interface VirtualFile
 
    /**
     * Get the URL used for streaming.
-    * 
+    *
     * @return The stream URL or null if this is not the mounted root file.
     */
    URL getStreamURL() throws IOException;
@@ -96,7 +97,7 @@ public interface VirtualFile
     * @throws IllegalStateException if the file is closed
     */
    VirtualFile getParent() throws IOException;
-   
+
    /**
     * Get a child
     *
@@ -118,7 +119,7 @@ public interface VirtualFile
     * @throws IllegalStateException if the file is closed
     */
    List<VirtualFile> getChildrenRecursively() throws IOException;
-   
+
    /**
     * Get the children<p>
     *
@@ -129,26 +130,26 @@ public interface VirtualFile
     * @throws IllegalStateException if the file is closed
     */
    List<VirtualFile> getChildren() throws IOException;
-   
+
    /**
     * Returns entries in this bundle and its attached fragments. This bundle's
     * class loader is not used to search for entries. Only the contents of this
     * bundle and its attached fragments are searched for the specified entries.
-    * 
+    *
     * @see Bundle.findEntries(String path, String pattern, boolean recurse)
     */
    Enumeration<URL> findEntries(String path, String pattern, boolean recurse) throws IOException;
-   
+
    /**
     * Returns an Enumeration of all the paths (<code>String</code> objects)
     * to entries within this bundle whose longest sub-path matches the
     * specified path. This bundle's class loader is not used to search for
     * entries. Only the contents of this bundle are searched.
-    * 
+    *
     * @see Bundle.getEntryPaths(String path)
     */
    Enumeration<String> getEntryPaths(String path) throws IOException;
-   
+
    /**
     * Access the file contents.
     *
@@ -157,9 +158,4 @@ public interface VirtualFile
     * @throws IllegalStateException if the file is closed
     */
    InputStream openStream() throws IOException;
-   
-   /**
-    * Close the file resources (stream, etc.)
-    */
-   void close(); 
 }

@@ -49,10 +49,6 @@
       <artifactId>jboss-vfs</artifactId>
       <version>${version.jboss.vfs}</version>
     </dependency>
-    <dependency>
-      <groupId>org.jboss.logging</groupId>
-      <artifactId>jboss-logging</artifactId>
-    </dependency>
     
     <dependency>
       <groupId>junit</groupId>

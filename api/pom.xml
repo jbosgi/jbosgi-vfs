@@ -28,4 +28,12 @@
     <version>1.0.3-SNAPSHOT</version>
   </parent>
 
+  <!-- Dependencies -->
+  <dependencies>
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging</artifactId>
+    </dependency>
+  </dependencies>
+  
 </project>
