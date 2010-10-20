@@ -208,6 +208,12 @@ class VirtualFileAdaptor30 implements VirtualFile
    }
 
    @Override
+   public void recursiveCopy(File target) throws IOException
+   {
+      VFSUtils.recursiveCopy(vfsFile, target);
+   }
+   
+   @Override
    public void close()
    {
       VFSUtils.safeClose(mount);

@@ -22,6 +22,7 @@
 package org.jboss.osgi.vfs;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -158,4 +159,11 @@ public interface VirtualFile extends Closeable
     * @throws IllegalStateException if the file is closed
     */
    InputStream openStream() throws IOException;
+
+   /**
+    * Recursively copies this virtual file to the given target. 
+     * @param targetDir the target directory
+     * @throws IOException if an I/O error occurs before the copy is complete
+    */
+   void recursiveCopy(File targetDir) throws IOException;
 }

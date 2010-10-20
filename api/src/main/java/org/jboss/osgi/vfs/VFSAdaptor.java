@@ -40,17 +40,17 @@ public interface VFSAdaptor
     * @param rootURL the root url
     * @return the virtual file
     * @throws IOException if there is a problem accessing the VFS
-    * @throws IllegalArgumentException if the rootURL
     */
    VirtualFile toVirtualFile(URL url) throws IOException;
 
    /**
     * Adapt an InputStream to a virtual file.
-    * @param name TODO
+    * @param name The name of the virtual file
     * @param inputStream The input stream
     * @return The VirtualFile abstraction
+    * @throws IOException if there is a problem accessing the VFS
     */
-   VirtualFile toVirtualFile(String name, InputStream inputStream);
+   VirtualFile toVirtualFile(String name, InputStream inputStream) throws IOException;
 
    /**
     * Adapt a concrete instance of a jboss-vfs VirtualFile.

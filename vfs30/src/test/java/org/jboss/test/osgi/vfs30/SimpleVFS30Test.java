@@ -66,7 +66,7 @@ public class SimpleVFS30Test
    {
       archive = ShrinkWrap.create(JavaArchive.class, "example-simple.jar");
       archive.addClass(SimpleActivator.class);
-      Asset asset = new Asset()
+      archive.setManifest(new Asset()
       {
          public InputStream openStream()
          {
@@ -81,12 +81,11 @@ public class SimpleVFS30Test
                throw new IllegalStateException("Cannot open stream for: " + path, ex);
             }
          }
-      };
-      archive.add(asset, JarFile.MANIFEST_NAME);
+      });
    }
 
    @Before
-   public void setUp()
+   public void setUp() throws Exception
    {
       virtualFile = toVirtualFile(archive);
    }
@@ -184,7 +183,7 @@ public class SimpleVFS30Test
       assertEquals("example-simple", symbolicName);
    }
 
-   private VirtualFile toVirtualFile(JavaArchive archive)
+   private VirtualFile toVirtualFile(JavaArchive archive) throws IOException
    {
       ZipExporter exporter = archive.as(ZipExporter.class);
       InputStream inputStream = exporter.exportZip();

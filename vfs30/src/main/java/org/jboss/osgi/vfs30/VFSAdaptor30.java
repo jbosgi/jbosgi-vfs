@@ -22,6 +22,7 @@
 package org.jboss.osgi.vfs30;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -102,13 +103,14 @@ public class VFSAdaptor30 implements VFSAdaptor
    }
 
    @Override
-   public VirtualFile toVirtualFile(String name, InputStream inputStream)
+   public VirtualFile toVirtualFile(String name, InputStream inputStream) throws IOException
    {
       if (inputStream == null)
          return null;
 
       try
       {
+         name = name.replace(File.separatorChar, '-');
          org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(name + "-" + System.currentTimeMillis());
          Closeable mount = VFS.mountZip(inputStream, name, vfsFile, tmpProvider);
          VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, mount);
