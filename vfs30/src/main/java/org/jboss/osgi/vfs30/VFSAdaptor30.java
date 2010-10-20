@@ -110,15 +110,15 @@ public class VFSAdaptor30 implements VFSAdaptor
 
       try
       {
-         name = name.replace(File.separatorChar, '-');
-         org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(name + "-" + System.currentTimeMillis());
-         Closeable mount = VFS.mountZip(inputStream, name, vfsFile, tmpProvider);
+         String internalName = name.replace(File.separatorChar, '-');
+         org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(internalName + "-" + System.currentTimeMillis());
+         Closeable mount = VFS.mountZip(inputStream, internalName, vfsFile, tmpProvider);
          VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, mount);
          return absFile;
       }
       catch (IOException ex)
       {
-         throw new IllegalStateException("Cannot mount input stream", ex);
+         throw new IllegalStateException("Cannot mount input stream: " + name, ex);
       }
    }
 
