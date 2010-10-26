@@ -110,7 +110,12 @@ public class VFSAdaptor30 implements VFSAdaptor
 
       try
       {
-         String internalName = name.replace(File.separatorChar, '-');
+         String internalName = name.replace('/', '-');
+         if (File.separatorChar == '\\')
+            // On Windows we normally use forward slashes internally, but this file name could 
+            // potentially contain backward slashes too
+            internalName = internalName.replace('\\', '-');
+
          org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(internalName + "-" + System.currentTimeMillis());
          Closeable mount = VFS.mountZip(inputStream, internalName, vfsFile, tmpProvider);
          VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, mount);

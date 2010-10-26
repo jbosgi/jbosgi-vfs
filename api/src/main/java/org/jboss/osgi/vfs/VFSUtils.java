@@ -22,7 +22,6 @@
 package org.jboss.osgi.vfs;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -121,6 +120,6 @@ public final class VFSUtils
 
    public static String getPathFromPackageName(String packageName)
    {
-      return packageName.replace('.', File.separatorChar);
+      return packageName.replace('.', '/');
    }
 }
