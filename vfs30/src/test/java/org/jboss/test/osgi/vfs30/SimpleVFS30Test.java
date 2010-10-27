@@ -21,7 +21,6 @@
  */
 package org.jboss.test.osgi.vfs30;
 
-//$Id: SimpleTestCase.java 102173 2010-03-09 21:16:59Z thomas.diesler@jboss.com $
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

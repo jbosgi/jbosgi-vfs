@@ -21,7 +21,6 @@
  */
 package org.jboss.test.osgi.vfs30.bundle;
 
-//$Id: SimpleActivator.java 101150 2010-02-19 10:50:46Z thomas.diesler@jboss.com $
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
