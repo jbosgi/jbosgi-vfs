@@ -29,7 +29,7 @@
   <parent>
     <groupId>org.jboss.osgi.vfs</groupId>
     <artifactId>jboss-osgi-vfs-parent</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4</version>
   </parent>
 
   <!-- Properties -->
