@@ -47,12 +47,12 @@ public abstract class AbstractVFS
       return getVFSAdaptor().toVirtualFile(name, inputStream);
    }
 
-   public static VirtualFile adapt(Object virtualFile)
+   public static VirtualFile adapt(Object virtualFile) throws IOException
    {
       return getVFSAdaptor().adapt(virtualFile);
    }
 
-   public static Object adapt(VirtualFile virtualFile)
+   public static Object adapt(VirtualFile virtualFile) throws IOException
    {
       return getVFSAdaptor().adapt(virtualFile);
    }

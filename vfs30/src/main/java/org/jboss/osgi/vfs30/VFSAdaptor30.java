@@ -39,7 +39,7 @@ import org.jboss.vfs.VFS;
 
 /**
  * An adaptor to the jboss-vfs-3.0.x VFS.
- *
+ * 
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
@@ -64,7 +64,7 @@ public class VFSAdaptor30 implements VFSAdaptor
       {
          throw new IllegalStateException("Cannot create VFS temp file provider", ex);
       }
-      
+
       Thread shutdownThread = new Thread("vfs-shutdown")
       {
          @Override
@@ -82,7 +82,7 @@ public class VFSAdaptor30 implements VFSAdaptor
       };
       Runtime.getRuntime().addShutdownHook(shutdownThread);
    }
-   
+
    static TempFileProvider getTempFileProvider()
    {
       return tmpProvider;
@@ -108,26 +108,20 @@ public class VFSAdaptor30 implements VFSAdaptor
       if (inputStream == null)
          return null;
 
-      try
-      {
-         String internalName = name.replace('/', '-');
-         if (File.separatorChar == '\\')
-            // On Windows we normally use forward slashes internally, but this file name could 
-            // potentially contain backward slashes too
-            internalName = internalName.replace('\\', '-');
+      String internalName = name.replace('/', '-');
+      if (File.separatorChar == '\\')
+         // On Windows we normally use forward slashes internally, but this
+         // file name could
+         // potentially contain backward slashes too
+         internalName = internalName.replace('\\', '-');
 
-         org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(internalName + "-" + System.currentTimeMillis());
-         Closeable mount = VFS.mountZip(inputStream, internalName, vfsFile, tmpProvider);
-         VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, mount);
-         return absFile;
-      }
-      catch (IOException ex)
-      {
-         throw new IllegalStateException("Cannot mount input stream: " + name, ex);
-      }
+      org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(internalName + "-" + System.currentTimeMillis());
+      Closeable mount = VFS.mountZip(inputStream, internalName, vfsFile, tmpProvider);
+      VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, mount);
+      return absFile;
    }
 
-   public VirtualFile adapt(Object other)
+   public VirtualFile adapt(Object other) throws IOException
    {
       if (other == null)
          return null;
@@ -144,15 +138,8 @@ public class VFSAdaptor30 implements VFSAdaptor
       absFile = new VirtualFileAdaptor30(vfsFile);
       if (acceptForMount(vfsFile))
       {
-         try
-         {
-            Closeable mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
-            absFile = new VirtualFileAdaptor30(vfsFile, mount);
-         }
-         catch (IOException ex)
-         {
-            throw new IllegalStateException("Cannot mount native file: " + other, ex);
-         }
+         Closeable mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
+         absFile = new VirtualFileAdaptor30(vfsFile, mount);
       }
 
       // Register the VirtualFile abstraction

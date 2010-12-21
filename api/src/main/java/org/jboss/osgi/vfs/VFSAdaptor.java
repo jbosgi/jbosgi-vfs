@@ -58,13 +58,13 @@ public interface VFSAdaptor
     * @return The VirtualFile abstraction
     * @throws IllegalArgumentException If the given virtualFile is not a VirtualFile supported by the VFSAdaptor implementation
     */
-   VirtualFile adapt(Object virtualFile);
+   VirtualFile adapt(Object virtualFile) throws IOException;
 
    /**
     * Adapt a VirtualFile to a concrete instance of a jboss-vfs VirtualFile.
     * @param virtualFile The VirtualFile instance
     * @return The jboss-vfs VirtualFile
     */
-   Object adapt(VirtualFile virtualFile);
+   Object adapt(VirtualFile virtualFile) throws IOException;
 }
 

@@ -22,13 +22,13 @@
   <description>The JBossOSGi VFS Abstration</description>
   
   <groupId>org.jboss.osgi.vfs</groupId>
-  <artifactId>jboss-osgi-vfs30</artifactId>
+  <artifactId>jbosgi-vfs30</artifactId>
   <packaging>jar</packaging>
   
   <!-- Parent -->
   <parent>
     <groupId>org.jboss.osgi.vfs</groupId>
-    <artifactId>jboss-osgi-vfs-parent</artifactId>
+    <artifactId>jbosgi-vfs-parent</artifactId>
     <version>1.0.5-SNAPSHOT</version>
   </parent>
 
@@ -41,7 +41,7 @@
   <dependencies>
     <dependency>
       <groupId>org.jboss.osgi.vfs</groupId>
-      <artifactId>jboss-osgi-vfs</artifactId>
+      <artifactId>jbosgi-vfs</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
