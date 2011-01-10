@@ -27,6 +27,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.CodeSigner;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -208,11 +210,17 @@ class VirtualFileAdaptor30 implements VirtualFile
    }
 
    @Override
-   public void recursiveCopy(File target) throws IOException
+   public Certificate[] getCertificates()
    {
-      VFSUtils.recursiveCopy(vfsFile, target);
+      return vfsFile.getCertificates();
    }
-   
+
+   @Override
+   public CodeSigner[] getCodeSigners()
+   {
+      return vfsFile.getCodeSigners();
+   }
+
    @Override
    public void close()
    {

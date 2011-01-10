@@ -22,11 +22,12 @@
 package org.jboss.osgi.vfs;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.CodeSigner;
+import java.security.cert.Certificate;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -161,9 +162,17 @@ public interface VirtualFile extends Closeable
    InputStream openStream() throws IOException;
 
    /**
-    * Recursively copies this virtual file to the given target. 
-     * @param targetDir the target directory
-     * @throws IOException if an I/O error occurs before the copy is complete
+    * Get the {@link Certificate}s for the virtual file.  Simply extracts the certificate entries from
+    * the code signers array.
+    *
+    * @return the certificates for the virtual file, or {@code null} if not signed
     */
-   void recursiveCopy(File targetDir) throws IOException;
+   Certificate[] getCertificates();
+   
+   /**
+    * Get the {@link CodeSigner}s for a the virtual file.
+    *
+    * @return the {@link CodeSigner}s for the virtual file, or {@code null} if not signed
+    */
+   CodeSigner[] getCodeSigners();
 }
