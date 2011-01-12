@@ -21,20 +21,17 @@
  */
 package org.jboss.osgi.vfs30;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.jboss.osgi.vfs.VFSAdaptor;
 import org.jboss.osgi.vfs.VirtualFile;
-import org.jboss.vfs.TempFileProvider;
 import org.jboss.vfs.VFS;
 
 /**
@@ -46,46 +43,21 @@ import org.jboss.vfs.VFS;
 public class VFSAdaptor30 implements VFSAdaptor {
 
     private static Map<org.jboss.vfs.VirtualFile, VirtualFile> registry = new WeakHashMap<org.jboss.vfs.VirtualFile, VirtualFile>();
-    private static Set<String> suffixes = new HashSet<String>();
-    static {
-        suffixes.add(".jar");
-        suffixes.add(".war");
-    }
 
-    private static final TempFileProvider tmpProvider;
-    static {
-        try {
-            tmpProvider = TempFileProvider.create("osgitmp-", null);
-        } catch (IOException ex) {
-            throw new IllegalStateException("Cannot create VFS temp file provider", ex);
-        }
-
-        Thread shutdownThread = new Thread("vfs-shutdown") {
-
-            @Override
-            public void run() {
-                try {
-                    tmpProvider.close();
-                } catch (IOException ex) {
-                    throw new IllegalStateException("Cannot close VFS temp file provider", ex);
-                }
-            }
-        };
-        Runtime.getRuntime().addShutdownHook(shutdownThread);
-    }
-
-    static TempFileProvider getTempFileProvider() {
-        return tmpProvider;
-    }
-
+    @Override
     public VirtualFile toVirtualFile(URL url) throws IOException {
         try {
-            org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(url);
-            VirtualFileAdaptor30 absFile = (VirtualFileAdaptor30) adapt(vfsFile);
-            return absFile;
+            return toVirtualFile(url.toURI());
         } catch (URISyntaxException ex) {
             throw new IOException(ex);
         }
+    }
+
+    @Override
+    public VirtualFile toVirtualFile(URI uri) throws IOException {
+        org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(uri);
+        VirtualFileAdaptor30 absFile = (VirtualFileAdaptor30) adapt(vfsFile);
+        return absFile;
     }
 
     @Override
@@ -101,11 +73,11 @@ public class VFSAdaptor30 implements VFSAdaptor {
             internalName = internalName.replace('\\', '-');
 
         org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(internalName + "-" + System.currentTimeMillis());
-        Closeable mount = VFS.mountZip(inputStream, internalName, vfsFile, tmpProvider);
-        VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, mount);
+        VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, inputStream);
         return absFile;
     }
 
+    @Override
     public VirtualFile adapt(Object other) throws IOException {
         if (other == null)
             return null;
@@ -118,32 +90,13 @@ public class VFSAdaptor30 implements VFSAdaptor {
         if (absFile != null)
             return absFile;
 
-        // Accept the file for mounting
-        absFile = new VirtualFileAdaptor30(vfsFile);
-        if (acceptForMount(vfsFile)) {
-            Closeable mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
-            absFile = new VirtualFileAdaptor30(vfsFile, mount);
-        }
-
         // Register the VirtualFile abstraction
+        absFile = new VirtualFileAdaptor30(vfsFile);
         registry.put(vfsFile, absFile);
         return absFile;
     }
 
-    private boolean acceptForMount(org.jboss.vfs.VirtualFile vfsFile) {
-        boolean accept = false;
-        if (vfsFile.isFile() == true) {
-            String rootName = vfsFile.getName();
-            for (String suffix : suffixes) {
-                if (rootName.endsWith(suffix)) {
-                    accept = true;
-                    break;
-                }
-            }
-        }
-        return accept;
-    }
-
+    @Override
     public Object adapt(VirtualFile absFile) {
         if (absFile == null)
             return null;

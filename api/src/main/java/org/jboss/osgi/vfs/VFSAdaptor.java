@@ -23,6 +23,7 @@ package org.jboss.osgi.vfs;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 
 /**
@@ -38,11 +39,20 @@ public interface VFSAdaptor {
     /**
      * Get the root virtual file
      * 
-     * @param rootURL the root url
+     * @param url the root url
      * @return the virtual file
      * @throws IOException if there is a problem accessing the VFS
      */
     VirtualFile toVirtualFile(URL url) throws IOException;
+
+    /**
+     * Get the root virtual file
+     * 
+     * @param uri the root uri
+     * @return the virtual file
+     * @throws IOException if there is a problem accessing the VFS
+     */
+    VirtualFile toVirtualFile(URI uri) throws IOException;
 
     /**
      * Adapt an InputStream to a virtual file.

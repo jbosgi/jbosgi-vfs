@@ -32,12 +32,16 @@ import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
 import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.vfs.TempDir;
+import org.jboss.vfs.TempFileProvider;
+import org.jboss.vfs.VFS;
 import org.jboss.vfs.VFSUtils;
 import org.jboss.vfs.VirtualJarInputStream;
 
@@ -54,9 +58,37 @@ class VirtualFileAdaptor30 implements VirtualFile {
     private TempDir streamDir;
     private File streamFile;
 
-    VirtualFileAdaptor30(org.jboss.vfs.VirtualFile vfsFile, Closeable mount) {
+    private static Set<String> suffixes = new HashSet<String>();
+    static {
+        suffixes.add(".jar");
+        suffixes.add(".war");
+    }
+
+    private static final TempFileProvider tmpProvider;
+    static {
+        try {
+            tmpProvider = TempFileProvider.create("osgitmp-", null);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Cannot create VFS temp file provider", ex);
+        }
+
+        Thread shutdownThread = new Thread("vfs-shutdown") {
+
+            @Override
+            public void run() {
+                try {
+                    tmpProvider.close();
+                } catch (IOException ex) {
+                    throw new IllegalStateException("Cannot close VFS temp file provider", ex);
+                }
+            }
+        };
+        Runtime.getRuntime().addShutdownHook(shutdownThread);
+    }
+
+    VirtualFileAdaptor30(org.jboss.vfs.VirtualFile vfsFile, InputStream input) throws IOException {
         this(vfsFile);
-        this.mount = mount;
+        mount = VFS.mountZip(input, vfsFile.getName(), vfsFile, tmpProvider);
     }
 
     VirtualFileAdaptor30(org.jboss.vfs.VirtualFile vfsFile) {
@@ -97,7 +129,7 @@ class VirtualFileAdaptor30 implements VirtualFile {
             return vfsFile.toURL();
 
         if (streamFile == null) {
-            streamDir = VFSAdaptor30.getTempFileProvider().createTempDir("urlstream");
+            streamDir = tmpProvider.createTempDir("urlstream");
             streamFile = streamDir.getFile(getName());
 
             JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(streamFile));
@@ -122,7 +154,7 @@ class VirtualFileAdaptor30 implements VirtualFile {
 
     @Override
     public VirtualFile getChild(String path) throws IOException {
-        org.jboss.vfs.VirtualFile child = vfsFile.getChild(path);
+        org.jboss.vfs.VirtualFile child = getMountedChild(path);
         if (child.exists() == false)
             return null;
 
@@ -132,7 +164,7 @@ class VirtualFileAdaptor30 implements VirtualFile {
     @Override
     public List<VirtualFile> getChildrenRecursively() throws IOException {
         List<VirtualFile> files = new ArrayList<VirtualFile>();
-        for (org.jboss.vfs.VirtualFile child : vfsFile.getChildrenRecursively())
+        for (org.jboss.vfs.VirtualFile child : getMountedChildrenRecursively())
             files.add(new VirtualFileAdaptor30(child));
         return Collections.unmodifiableList(files);
     }
@@ -140,7 +172,7 @@ class VirtualFileAdaptor30 implements VirtualFile {
     @Override
     public List<VirtualFile> getChildren() throws IOException {
         List<VirtualFile> files = new ArrayList<VirtualFile>();
-        for (org.jboss.vfs.VirtualFile child : vfsFile.getChildren())
+        for (org.jboss.vfs.VirtualFile child : getMountedChildren())
             files.add(new VirtualFileAdaptor30(child));
         return Collections.unmodifiableList(files);
     }
@@ -156,7 +188,7 @@ class VirtualFileAdaptor30 implements VirtualFile {
         if (path.startsWith("/"))
             path = path.substring(1);
 
-        org.jboss.vfs.VirtualFile child = vfsFile.getChild(path);
+        org.jboss.vfs.VirtualFile child = getMountedChild(path);
         if (child.exists() == false)
             return null;
 
@@ -172,10 +204,12 @@ class VirtualFileAdaptor30 implements VirtualFile {
             path = path.substring(1);
 
         org.jboss.vfs.VirtualFile child;
-        if (path.length() > 0)
-            child = vfsFile.getChild(path);
-        else
+        if (path.length() > 0) {
+            child = getMountedChild(path);
+        } else {
+            ensureMounted();
             child = vfsFile;
+        }
 
         if (child.exists() == false)
             return null;
@@ -211,6 +245,41 @@ class VirtualFileAdaptor30 implements VirtualFile {
             streamParent.delete();
             streamFile = null;
         }
+    }
+
+    private boolean acceptForMount(org.jboss.vfs.VirtualFile vfsFile) {
+        boolean accept = false;
+        if (vfsFile.isFile() == true) {
+            String rootName = vfsFile.getName();
+            for (String suffix : suffixes) {
+                if (rootName.endsWith(suffix)) {
+                    accept = true;
+                    break;
+                }
+            }
+        }
+        return accept;
+    }
+
+    private void ensureMounted() throws IOException {
+        if (mount == null && acceptForMount(vfsFile)) {
+            mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
+        }
+    }
+
+    private org.jboss.vfs.VirtualFile getMountedChild(String path) throws IOException {
+        ensureMounted();
+        return vfsFile.getChild(path);
+    }
+
+    private List<org.jboss.vfs.VirtualFile> getMountedChildren() throws IOException {
+        ensureMounted();
+        return vfsFile.getChildren();
+    }
+
+    private List<org.jboss.vfs.VirtualFile> getMountedChildrenRecursively() throws IOException {
+        ensureMounted();
+        return vfsFile.getChildrenRecursively();
     }
 
     @Override

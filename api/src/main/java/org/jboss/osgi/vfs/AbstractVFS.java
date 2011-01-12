@@ -23,6 +23,7 @@ package org.jboss.osgi.vfs;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 
 /**
@@ -36,6 +37,10 @@ import java.net.URL;
 public abstract class AbstractVFS {
 
     private static VFSAdaptor adaptor;
+
+    public static VirtualFile toVirtualFile(URI uri) throws IOException {
+        return getVFSAdaptor().toVirtualFile(uri);
+    }
 
     public static VirtualFile toVirtualFile(URL url) throws IOException {
         return getVFSAdaptor().toVirtualFile(url);
