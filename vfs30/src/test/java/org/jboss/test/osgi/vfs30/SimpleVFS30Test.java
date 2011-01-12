@@ -21,7 +21,6 @@
  */
 package org.jboss.test.osgi.vfs30;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -51,141 +50,127 @@ import org.osgi.framework.Constants;
 
 /**
  * A test that verifies the VFS30 abstraction.
- *
+ * 
  * @author thomas.diesler@jboss.com
  * @since 11-Mar-2010
  */
-public class SimpleVFS30Test
-{
-   private static JavaArchive archive;
-   private VirtualFile virtualFile;
+public class SimpleVFS30Test {
 
-   @BeforeClass
-   public static void beforeClass() throws IOException
-   {
-      archive = ShrinkWrap.create(JavaArchive.class, "example-simple.jar");
-      archive.addClass(SimpleActivator.class);
-      archive.setManifest(new Asset()
-      {
-         public InputStream openStream()
-         {
-            String path = "/simple/" + JarFile.MANIFEST_NAME;
-            try
-            {
-               URL manifest = getClass().getResource(path);
-               return manifest.openStream();
+    private static JavaArchive archive;
+    private VirtualFile virtualFile;
+
+    @BeforeClass
+    public static void beforeClass() throws IOException {
+        archive = ShrinkWrap.create(JavaArchive.class, "example-simple.jar");
+        archive.addClass(SimpleActivator.class);
+        archive.setManifest(new Asset() {
+
+            public InputStream openStream() {
+                String path = "/simple/" + JarFile.MANIFEST_NAME;
+                try {
+                    URL manifest = getClass().getResource(path);
+                    return manifest.openStream();
+                } catch (IOException ex) {
+                    throw new IllegalStateException("Cannot open stream for: " + path, ex);
+                }
             }
-            catch (IOException ex)
-            {
-               throw new IllegalStateException("Cannot open stream for: " + path, ex);
-            }
-         }
-      });
-   }
+        });
+    }
 
-   @Before
-   public void setUp() throws Exception
-   {
-      virtualFile = toVirtualFile(archive);
-   }
+    @Before
+    public void setUp() throws Exception {
+        virtualFile = toVirtualFile(archive);
+    }
 
-   @After
-   public void tearDown() throws IOException
-   {
-      if (virtualFile != null)
-         virtualFile.close();
-   }
+    @After
+    public void tearDown() throws IOException {
+        if (virtualFile != null)
+            virtualFile.close();
+    }
 
-   @Test
-   public void testManifestAccess() throws Exception
-   {
-      VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
-      assertNotNull("Manifest not null", child);
+    @Test
+    public void testManifestAccess() throws Exception {
+        VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
+        assertNotNull("Manifest not null", child);
 
-      Manifest manifest = new Manifest();
-      manifest.read(child.openStream());
-      Attributes attributes = manifest.getMainAttributes();
-      String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
-      assertEquals("example-simple", symbolicName);
-   }
+        Manifest manifest = new Manifest();
+        manifest.read(child.openStream());
+        Attributes attributes = manifest.getMainAttributes();
+        String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
+        assertEquals("example-simple", symbolicName);
+    }
 
-   @Test
-   public void testManifestURLAccess() throws Exception
-   {
-      VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
-      assertNotNull("Manifest not null", child);
+    @Test
+    public void testManifestURLAccess() throws Exception {
+        VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
+        assertNotNull("Manifest not null", child);
 
-      URL childURL = child.toURL();
-      InputStream is = childURL.openStream();
+        URL childURL = child.toURL();
+        InputStream is = childURL.openStream();
 
-      Manifest manifest = new Manifest();
-      manifest.read(is);
-      Attributes attributes = manifest.getMainAttributes();
-      String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
-      assertEquals("example-simple", symbolicName);
-   }
+        Manifest manifest = new Manifest();
+        manifest.read(is);
+        Attributes attributes = manifest.getMainAttributes();
+        String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
+        assertEquals("example-simple", symbolicName);
+    }
 
-   @Test
-   public void testGetEntryPaths() throws Exception
-   {
-      Set<String> actual = new HashSet<String>();
-      Enumeration<String> en = virtualFile.getEntryPaths("/");
-      while (en.hasMoreElements())
-         actual.add(en.nextElement());
+    @Test
+    public void testGetEntryPaths() throws Exception {
+        Set<String> actual = new HashSet<String>();
+        Enumeration<String> en = virtualFile.getEntryPaths("/");
+        while (en.hasMoreElements())
+            actual.add(en.nextElement());
 
-      Set<String> expected = new HashSet<String>();
-      expected.add("org/");
-      expected.add("org/jboss/");
-      expected.add("org/jboss/test/");
-      expected.add("org/jboss/test/osgi/");
-      expected.add("org/jboss/test/osgi/vfs30/");
-      expected.add("org/jboss/test/osgi/vfs30/bundle/");
-      expected.add("org/jboss/test/osgi/vfs30/bundle/SimpleActivator.class");
-      expected.add("META-INF/");
-      expected.add("META-INF/MANIFEST.MF");
-      assertEquals(expected, actual);
-   }
+        Set<String> expected = new HashSet<String>();
+        expected.add("org/");
+        expected.add("org/jboss/");
+        expected.add("org/jboss/test/");
+        expected.add("org/jboss/test/osgi/");
+        expected.add("org/jboss/test/osgi/vfs30/");
+        expected.add("org/jboss/test/osgi/vfs30/bundle/");
+        expected.add("org/jboss/test/osgi/vfs30/bundle/SimpleActivator.class");
+        expected.add("META-INF/");
+        expected.add("META-INF/MANIFEST.MF");
+        assertEquals(expected, actual);
+    }
 
-   @Test
-   public void testFindEntries() throws Exception
-   {
-      Set<String> actual = new HashSet<String>();
-      Enumeration<URL> en = virtualFile.findEntries("/", null, true);
-      while (en.hasMoreElements())
-         actual.add(en.nextElement().toExternalForm());
+    @Test
+    public void testFindEntries() throws Exception {
+        Set<String> actual = new HashSet<String>();
+        Enumeration<URL> en = virtualFile.findEntries("/", null, true);
+        while (en.hasMoreElements())
+            actual.add(en.nextElement().toExternalForm());
 
-      Set<String> expected = new HashSet<String>();
-      expected.add(virtualFile.toURL() + "org/jboss/test/osgi/vfs30/bundle/SimpleActivator.class");
-      expected.add(virtualFile.toURL() + "META-INF/MANIFEST.MF");
-      assertEquals(expected, actual);
-   }
+        Set<String> expected = new HashSet<String>();
+        expected.add(virtualFile.toURL() + "org/jboss/test/osgi/vfs30/bundle/SimpleActivator.class");
+        expected.add(virtualFile.toURL() + "META-INF/MANIFEST.MF");
+        assertEquals(expected, actual);
+    }
 
-   @Test
-   public void testStreamURLAccess() throws Exception
-   {
-      URL streamURL = virtualFile.getStreamURL();
-      JarInputStream jarIn = new JarInputStream(streamURL.openStream());
-      Manifest manifest = jarIn.getManifest();
-      Attributes attributes = manifest.getMainAttributes();
-      String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
-      assertEquals("example-simple", symbolicName);
-   }
+    @Test
+    public void testStreamURLAccess() throws Exception {
+        URL streamURL = virtualFile.getStreamURL();
+        JarInputStream jarIn = new JarInputStream(streamURL.openStream());
+        Manifest manifest = jarIn.getManifest();
+        Attributes attributes = manifest.getMainAttributes();
+        String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
+        assertEquals("example-simple", symbolicName);
+    }
 
-   @Test
-   public void testStreamAccess() throws Exception
-   {
-      InputStream instream = virtualFile.openStream();
-      JarInputStream jarIn = new JarInputStream(instream);
-      Manifest manifest = jarIn.getManifest();
-      Attributes attributes = manifest.getMainAttributes();
-      String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
-      assertEquals("example-simple", symbolicName);
-   }
+    @Test
+    public void testStreamAccess() throws Exception {
+        InputStream instream = virtualFile.openStream();
+        JarInputStream jarIn = new JarInputStream(instream);
+        Manifest manifest = jarIn.getManifest();
+        Attributes attributes = manifest.getMainAttributes();
+        String symbolicName = attributes.getValue(Constants.BUNDLE_SYMBOLICNAME);
+        assertEquals("example-simple", symbolicName);
+    }
 
-   private VirtualFile toVirtualFile(JavaArchive archive) throws IOException
-   {
-      ZipExporter exporter = archive.as(ZipExporter.class);
-      InputStream inputStream = exporter.exportZip();
-      return AbstractVFS.toVirtualFile(archive.getName(), inputStream);
-   }
+    private VirtualFile toVirtualFile(JavaArchive archive) throws IOException {
+        ZipExporter exporter = archive.as(ZipExporter.class);
+        InputStream inputStream = exporter.exportZip();
+        return AbstractVFS.toVirtualFile(archive.getName(), inputStream);
+    }
 }

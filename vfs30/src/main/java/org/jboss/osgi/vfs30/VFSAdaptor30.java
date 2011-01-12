@@ -43,139 +43,116 @@ import org.jboss.vfs.VFS;
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
-public class VFSAdaptor30 implements VFSAdaptor
-{
-   private static Map<org.jboss.vfs.VirtualFile, VirtualFile> registry = new WeakHashMap<org.jboss.vfs.VirtualFile, VirtualFile>();
-   private static Set<String> suffixes = new HashSet<String>();
-   static
-   {
-      suffixes.add(".jar");
-      suffixes.add(".war");
-   }
+public class VFSAdaptor30 implements VFSAdaptor {
 
-   private static final TempFileProvider tmpProvider;
-   static
-   {
-      try
-      {
-         tmpProvider = TempFileProvider.create("osgitmp-", null);
-      }
-      catch (IOException ex)
-      {
-         throw new IllegalStateException("Cannot create VFS temp file provider", ex);
-      }
+    private static Map<org.jboss.vfs.VirtualFile, VirtualFile> registry = new WeakHashMap<org.jboss.vfs.VirtualFile, VirtualFile>();
+    private static Set<String> suffixes = new HashSet<String>();
+    static {
+        suffixes.add(".jar");
+        suffixes.add(".war");
+    }
 
-      Thread shutdownThread = new Thread("vfs-shutdown")
-      {
-         @Override
-         public void run()
-         {
-            try
-            {
-               tmpProvider.close();
+    private static final TempFileProvider tmpProvider;
+    static {
+        try {
+            tmpProvider = TempFileProvider.create("osgitmp-", null);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Cannot create VFS temp file provider", ex);
+        }
+
+        Thread shutdownThread = new Thread("vfs-shutdown") {
+
+            @Override
+            public void run() {
+                try {
+                    tmpProvider.close();
+                } catch (IOException ex) {
+                    throw new IllegalStateException("Cannot close VFS temp file provider", ex);
+                }
             }
-            catch (IOException ex)
-            {
-               throw new IllegalStateException("Cannot close VFS temp file provider", ex);
+        };
+        Runtime.getRuntime().addShutdownHook(shutdownThread);
+    }
+
+    static TempFileProvider getTempFileProvider() {
+        return tmpProvider;
+    }
+
+    public VirtualFile toVirtualFile(URL url) throws IOException {
+        try {
+            org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(url);
+            VirtualFileAdaptor30 absFile = (VirtualFileAdaptor30) adapt(vfsFile);
+            return absFile;
+        } catch (URISyntaxException ex) {
+            throw new IOException(ex);
+        }
+    }
+
+    @Override
+    public VirtualFile toVirtualFile(String name, InputStream inputStream) throws IOException {
+        if (inputStream == null)
+            return null;
+
+        String internalName = name.replace('/', '-');
+        if (File.separatorChar == '\\')
+            // On Windows we normally use forward slashes internally, but this
+            // file name could
+            // potentially contain backward slashes too
+            internalName = internalName.replace('\\', '-');
+
+        org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(internalName + "-" + System.currentTimeMillis());
+        Closeable mount = VFS.mountZip(inputStream, internalName, vfsFile, tmpProvider);
+        VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, mount);
+        return absFile;
+    }
+
+    public VirtualFile adapt(Object other) throws IOException {
+        if (other == null)
+            return null;
+
+        if (other instanceof org.jboss.vfs.VirtualFile == false)
+            throw new IllegalArgumentException("Not a org.jboss.vfs.VirtualFile: " + other);
+
+        org.jboss.vfs.VirtualFile vfsFile = (org.jboss.vfs.VirtualFile) other;
+        VirtualFile absFile = registry.get(other);
+        if (absFile != null)
+            return absFile;
+
+        // Accept the file for mounting
+        absFile = new VirtualFileAdaptor30(vfsFile);
+        if (acceptForMount(vfsFile)) {
+            Closeable mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
+            absFile = new VirtualFileAdaptor30(vfsFile, mount);
+        }
+
+        // Register the VirtualFile abstraction
+        registry.put(vfsFile, absFile);
+        return absFile;
+    }
+
+    private boolean acceptForMount(org.jboss.vfs.VirtualFile vfsFile) {
+        boolean accept = false;
+        if (vfsFile.isFile() == true) {
+            String rootName = vfsFile.getName();
+            for (String suffix : suffixes) {
+                if (rootName.endsWith(suffix)) {
+                    accept = true;
+                    break;
+                }
             }
-         }
-      };
-      Runtime.getRuntime().addShutdownHook(shutdownThread);
-   }
+        }
+        return accept;
+    }
 
-   static TempFileProvider getTempFileProvider()
-   {
-      return tmpProvider;
-   }
+    public Object adapt(VirtualFile absFile) {
+        if (absFile == null)
+            return null;
 
-   public VirtualFile toVirtualFile(URL url) throws IOException
-   {
-      try
-      {
-         org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(url);
-         VirtualFileAdaptor30 absFile = (VirtualFileAdaptor30)adapt(vfsFile);
-         return absFile;
-      }
-      catch (URISyntaxException ex)
-      {
-         throw new IOException(ex);
-      }
-   }
+        VirtualFileAdaptor30 adaptor = (VirtualFileAdaptor30) absFile;
+        return adaptor.getVirtualFile();
+    }
 
-   @Override
-   public VirtualFile toVirtualFile(String name, InputStream inputStream) throws IOException
-   {
-      if (inputStream == null)
-         return null;
-
-      String internalName = name.replace('/', '-');
-      if (File.separatorChar == '\\')
-         // On Windows we normally use forward slashes internally, but this
-         // file name could
-         // potentially contain backward slashes too
-         internalName = internalName.replace('\\', '-');
-
-      org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(internalName + "-" + System.currentTimeMillis());
-      Closeable mount = VFS.mountZip(inputStream, internalName, vfsFile, tmpProvider);
-      VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, mount);
-      return absFile;
-   }
-
-   public VirtualFile adapt(Object other) throws IOException
-   {
-      if (other == null)
-         return null;
-
-      if (other instanceof org.jboss.vfs.VirtualFile == false)
-         throw new IllegalArgumentException("Not a org.jboss.vfs.VirtualFile: " + other);
-
-      org.jboss.vfs.VirtualFile vfsFile = (org.jboss.vfs.VirtualFile)other;
-      VirtualFile absFile = registry.get(other);
-      if (absFile != null)
-         return absFile;
-
-      // Accept the file for mounting
-      absFile = new VirtualFileAdaptor30(vfsFile);
-      if (acceptForMount(vfsFile))
-      {
-         Closeable mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
-         absFile = new VirtualFileAdaptor30(vfsFile, mount);
-      }
-
-      // Register the VirtualFile abstraction
-      registry.put(vfsFile, absFile);
-      return absFile;
-   }
-
-   private boolean acceptForMount(org.jboss.vfs.VirtualFile vfsFile)
-   {
-      boolean accept = false;
-      if (vfsFile.isFile() == true)
-      {
-         String rootName = vfsFile.getName();
-         for (String suffix : suffixes)
-         {
-            if (rootName.endsWith(suffix))
-            {
-               accept = true;
-               break;
-            }
-         }
-      }
-      return accept;
-   }
-
-   public Object adapt(VirtualFile absFile)
-   {
-      if (absFile == null)
-         return null;
-
-      VirtualFileAdaptor30 adaptor = (VirtualFileAdaptor30)absFile;
-      return adaptor.getVirtualFile();
-   }
-
-   static void unregister(VirtualFileAdaptor30 absFile)
-   {
-      registry.remove(absFile.getVirtualFile());
-   }
+    static void unregister(VirtualFileAdaptor30 absFile) {
+        registry.remove(absFile.getVirtualFile());
+    }
 }

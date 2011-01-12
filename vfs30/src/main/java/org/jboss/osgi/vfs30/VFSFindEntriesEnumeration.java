@@ -1,24 +1,24 @@
 /*
-* JBoss, Home of Professional Open Source
-* Copyright 2009, Red Hat Middleware LLC, and individual contributors
-* as indicated by the @author tags. See the copyright.txt file in the
-* distribution for a full listing of individual contributors.
-*
-* This is free software; you can redistribute it and/or modify it
-* under the terms of the GNU Lesser General Public License as
-* published by the Free Software Foundation; either version 2.1 of
-* the License, or (at your option) any later version.
-*
-* This software is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-* Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public
-* License along with this software; if not, write to the Free
-* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-* 02110-1301 USA, or see the FSF site: http://www.fsf.org.
-*/
+ * JBoss, Home of Professional Open Source
+ * Copyright 2009, Red Hat Middleware LLC, and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
 package org.jboss.osgi.vfs30;
 
 import java.io.IOException;
@@ -34,7 +34,6 @@ import org.jboss.vfs.VirtualFileVisitor;
 import org.jboss.vfs.VisitorAttributes;
 import org.jboss.vfs.util.MatchAllVirtualFileFilter;
 
-
 /**
  * An enumeration of VFS entries.
  * 
@@ -42,93 +41,83 @@ import org.jboss.vfs.util.MatchAllVirtualFileFilter;
  * @author thomas.diesler@jboss.com
  * @version $Revision: 1.1 $
  */
-class VFSFindEntriesEnumeration implements Enumeration<URL>
-{
-   /** The paths */
-   private Iterator<URL> paths;
+class VFSFindEntriesEnumeration implements Enumeration<URL> {
 
-   /**
-    * Create a new VFSFindEntriesEnumeration.
-    * 
-    * @param root the root file
-    * @param file the file to enumerate
-    * @param filePattern the file pattern
-    * @param recurse whether to recurse
-    * @throws IOException for any error
-    */
-   public VFSFindEntriesEnumeration(VirtualFile root, VirtualFile file, String filePattern, boolean recurse) throws IOException
-   {
-      if (root == null)
-         throw new IllegalArgumentException("Null root");
-      if (file == null)
-         throw new IllegalArgumentException("Null file");
+    /** The paths */
+    private Iterator<URL> paths;
 
-      String rootPath = root.getPathName();
-      VisitorAttributes attributes = new VisitorAttributes();
-      attributes.setIncludeRoot(false);
-      attributes.setLeavesOnly(true);
-      if (recurse)
-         attributes.setRecurseFilter(MatchAllVirtualFileFilter.INSTANCE);
-      
-      VisitorImpl visitor = new VisitorImpl(rootPath, filePattern, attributes);
-      file.visit(visitor);
-      
-      this.paths = visitor.paths.iterator();
-   }
+    /**
+     * Create a new VFSFindEntriesEnumeration.
+     * 
+     * @param root the root file
+     * @param file the file to enumerate
+     * @param filePattern the file pattern
+     * @param recurse whether to recurse
+     * @throws IOException for any error
+     */
+    public VFSFindEntriesEnumeration(VirtualFile root, VirtualFile file, String filePattern, boolean recurse) throws IOException {
+        if (root == null)
+            throw new IllegalArgumentException("Null root");
+        if (file == null)
+            throw new IllegalArgumentException("Null file");
 
-   public boolean hasMoreElements()
-   {
-      return paths.hasNext();
-   }
+        String rootPath = root.getPathName();
+        VisitorAttributes attributes = new VisitorAttributes();
+        attributes.setIncludeRoot(false);
+        attributes.setLeavesOnly(true);
+        if (recurse)
+            attributes.setRecurseFilter(MatchAllVirtualFileFilter.INSTANCE);
 
-   public URL nextElement()
-   {
-      return paths.next();
-   }
-   
-   static class VisitorImpl implements VirtualFileVisitor
-   {
-      ArrayList<URL> paths = new ArrayList<URL>();
+        VisitorImpl visitor = new VisitorImpl(rootPath, filePattern, attributes);
+        file.visit(visitor);
 
-      Pattern filter;
-      String rootPath;
-      VisitorAttributes attributes;
-      
-      VisitorImpl(String rootPath, String filter, VisitorAttributes attributes)
-      {
-         this.rootPath = rootPath;
-         this.filter = convertToPattern(filter);
-         this.attributes = attributes;
-      }
+        this.paths = visitor.paths.iterator();
+    }
 
-      public VisitorAttributes getAttributes()
-      {
-         return attributes;
-      }
+    public boolean hasMoreElements() {
+        return paths.hasNext();
+    }
 
-      public void visit(VirtualFile virtualFile)
-      {
-         // See if the filter matches
-         Matcher matcher = filter.matcher(virtualFile.getName());
-         if (matcher.find() == false)
-            return;
-         
-         try
-         {
-            paths.add(virtualFile.toURL());
-         }
-         catch (Exception e)
-         {
-            throw new RuntimeException("Error visiting " + virtualFile, e);
-         }
-      }
-      
-      // Convert file pattern (RFC 1960-based Filter) into a RegEx pattern
-      private static Pattern convertToPattern(String filePattern)
-      {
-         filePattern = filePattern.replace("*", ".*");
-         return Pattern.compile("^" + filePattern + "$");
-      }
+    public URL nextElement() {
+        return paths.next();
+    }
 
-   }
+    static class VisitorImpl implements VirtualFileVisitor {
+
+        ArrayList<URL> paths = new ArrayList<URL>();
+
+        Pattern filter;
+        String rootPath;
+        VisitorAttributes attributes;
+
+        VisitorImpl(String rootPath, String filter, VisitorAttributes attributes) {
+            this.rootPath = rootPath;
+            this.filter = convertToPattern(filter);
+            this.attributes = attributes;
+        }
+
+        public VisitorAttributes getAttributes() {
+            return attributes;
+        }
+
+        public void visit(VirtualFile virtualFile) {
+            // See if the filter matches
+            Matcher matcher = filter.matcher(virtualFile.getName());
+            if (matcher.find() == false)
+                return;
+
+            try {
+                paths.add(virtualFile.toURL());
+            } catch (Exception e) {
+                throw new RuntimeException("Error visiting " + virtualFile, e);
+            }
+        }
+
+        // Convert file pattern (RFC 1960-based Filter) into a RegEx pattern
+        private static Pattern convertToPattern(String filePattern) {
+            filePattern = filePattern.replace("*", ".*");
+            return Pattern.compile("^" + filePattern + "$");
+        }
+
+    }
 }

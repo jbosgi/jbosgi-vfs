@@ -32,94 +32,74 @@ import org.jboss.logging.Logger;
 
 /**
  * Some VFS utilities that are used by the OSGi layer.
- *
+ * 
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
-public final class VFSUtils
-{
-   // Provide logging
-   private static final Logger log = Logger.getLogger(VFSUtils.class);
+public final class VFSUtils {
 
-   // Hide ctor
-   private VFSUtils()
-   {
-   }
+    // Provide logging
+    private static final Logger log = Logger.getLogger(VFSUtils.class);
 
-   public static Manifest getManifest(VirtualFile archive) throws IOException
-   {
-      if (archive == null)
-         throw new IllegalArgumentException("Null archive");
+    // Hide ctor
+    private VFSUtils() {
+    }
 
-      VirtualFile manifest = archive.getChild(JarFile.MANIFEST_NAME);
-      if (manifest == null)
-         return null;
+    public static Manifest getManifest(VirtualFile archive) throws IOException {
+        if (archive == null)
+            throw new IllegalArgumentException("Null archive");
 
-      InputStream stream = manifest.openStream();
-      try
-      {
-         return new Manifest(stream);
-      }
-      finally
-      {
-         try
-         {
-            stream.close();
-         }
-         catch (IOException ignored)
-         {
-         }
-      }
-   }
+        VirtualFile manifest = archive.getChild(JarFile.MANIFEST_NAME);
+        if (manifest == null)
+            return null;
 
-   public static void copyStream(InputStream is, OutputStream os) throws IOException
-   {
-      if (is == null)
-         throw new IllegalArgumentException("input stream is null");
-      if (os == null)
-         throw new IllegalArgumentException("output stream is null");
+        InputStream stream = manifest.openStream();
+        try {
+            return new Manifest(stream);
+        } finally {
+            try {
+                stream.close();
+            } catch (IOException ignored) {
+            }
+        }
+    }
 
-      try
-      {
-         byte[] buff = new byte[65536];
-         int rc = is.read(buff);
-         while (rc != -1)
-         {
-            os.write(buff, 0, rc);
-            rc = is.read(buff);
-         }
-      }
-      finally
-      {
-         os.flush();
-      }
-   }
+    public static void copyStream(InputStream is, OutputStream os) throws IOException {
+        if (is == null)
+            throw new IllegalArgumentException("input stream is null");
+        if (os == null)
+            throw new IllegalArgumentException("output stream is null");
 
-   /**
-    * Safely close some resource without throwing an exception.
-    * Any exception will be logged at TRACE level.
-    */
-   public static void safeClose(Closeable c)
-   {
-      try
-      {
-         if (c != null)
-            c.close();
-      }
-      catch (Exception ex)
-      {
-         log.trace("Failed to close resource", ex);
-      }
-   }
+        try {
+            byte[] buff = new byte[65536];
+            int rc = is.read(buff);
+            while (rc != -1) {
+                os.write(buff, 0, rc);
+                rc = is.read(buff);
+            }
+        } finally {
+            os.flush();
+        }
+    }
 
-   public static String getPathFromClassName(final String className)
-   {
-      int idx = className.lastIndexOf('.');
-      return idx > -1 ? getPathFromPackageName(className.substring(0, idx)) : "";
-   }
+    /**
+     * Safely close some resource without throwing an exception. Any exception will be logged at TRACE level.
+     */
+    public static void safeClose(Closeable c) {
+        try {
+            if (c != null)
+                c.close();
+        } catch (Exception ex) {
+            log.trace("Failed to close resource", ex);
+        }
+    }
 
-   public static String getPathFromPackageName(String packageName)
-   {
-      return packageName.replace('.', '/');
-   }
+    public static String getPathFromClassName(final String className) {
+        int idx = className.lastIndexOf('.');
+        return idx > -1 ? getPathFromPackageName(className.substring(0, idx)) : "";
+    }
+
+    public static String getPathFromPackageName(String packageName) {
+        return packageName.replace('.', '/');
+    }
 }
