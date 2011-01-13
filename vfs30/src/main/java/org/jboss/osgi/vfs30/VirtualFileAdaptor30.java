@@ -56,7 +56,7 @@ import org.jboss.vfs.VirtualJarInputStream;
 class VirtualFileAdaptor30 implements VirtualFile {
 
     private final org.jboss.vfs.VirtualFile vfsFile;
-    private RuntimeException leakDebuggingStack;
+    private IOException leakDebuggingStack;
     private Closeable mount;
     private TempDir streamDir;
     private File streamFile;
@@ -89,8 +89,6 @@ class VirtualFileAdaptor30 implements VirtualFile {
         }
 
         Thread shutdownThread = new Thread("vfs-shutdown") {
-
-            @Override
             public void run() {
                 try {
                     tmpProvider.close();
@@ -106,15 +104,13 @@ class VirtualFileAdaptor30 implements VirtualFile {
         this(VFS.getChild(name));
         if (input == null)
             throw new IllegalStateException("Null input");
-        mount = VFS.mountZip(input, vfsFile.getName(), vfsFile, tmpProvider);
+        mount = mountVirtualFile(input);
     }
 
     VirtualFileAdaptor30(org.jboss.vfs.VirtualFile vfsFile) {
         if (vfsFile == null)
             throw new IllegalStateException("Null vfsFile");
         this.vfsFile = vfsFile;
-        if (LEAK_DEBUGGING == true)
-            this.leakDebuggingStack = new RuntimeException("File created in this stack frame not closed");
     }
 
     @Override
@@ -276,24 +272,37 @@ class VirtualFileAdaptor30 implements VirtualFile {
         }
     }
 
-    private boolean acceptForMount(org.jboss.vfs.VirtualFile vfsFile) {
+    private boolean acceptForMount() {
+        if (vfsFile.isDirectory())
+            return false;
+
         boolean accept = false;
-        if (vfsFile.isFile() == true) {
-            String rootName = vfsFile.getName();
-            for (String suffix : suffixes) {
-                if (rootName.endsWith(suffix)) {
-                    accept = true;
-                    break;
-                }
+        String rootName = vfsFile.getName();
+        for (String suffix : suffixes) {
+            if (rootName.endsWith(suffix)) {
+                accept = true;
+                break;
             }
         }
         return accept;
     }
 
     private void ensureMounted() throws IOException {
-        if (mount == null && acceptForMount(vfsFile)) {
+        if (mount == null && acceptForMount()) {
+            mount = mountVirtualFile(null);
+        }
+    }
+
+    public Closeable mountVirtualFile(InputStream input) throws IOException {
+        Closeable mount;
+        if (input != null) {
+            mount = VFS.mountZip(input, vfsFile.getName(), vfsFile, tmpProvider);
+        } else {
             mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
         }
+        if (LEAK_DEBUGGING == true)
+            this.leakDebuggingStack = new IOException("VirtualFile created in this stack frame not closed");
+        return mount;
     }
 
     private org.jboss.vfs.VirtualFile getMountedChild(String path) throws IOException {

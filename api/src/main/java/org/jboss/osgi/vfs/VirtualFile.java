@@ -42,7 +42,7 @@ import java.util.List;
 public interface VirtualFile extends Closeable {
 
     /**
-     * System property to enable detection of unclosed virtual files 
+     * System property to enable detection of unclosed virtual files: <code>jboss.osgi.vfs.leakDebugging</code>
      */
     final String PROPERTY_VFS_LEAK_DEBUGGING = "jboss.osgi.vfs.leakDebugging";
 
