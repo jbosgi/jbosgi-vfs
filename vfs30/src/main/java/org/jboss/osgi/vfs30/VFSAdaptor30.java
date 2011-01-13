@@ -21,7 +21,6 @@
  */
 package org.jboss.osgi.vfs30;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -40,7 +39,7 @@ import org.jboss.vfs.VFS;
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
-public class VFSAdaptor30 implements VFSAdaptor {
+public final class VFSAdaptor30 implements VFSAdaptor {
 
     private static Map<org.jboss.vfs.VirtualFile, VirtualFile> registry = new WeakHashMap<org.jboss.vfs.VirtualFile, VirtualFile>();
 
@@ -56,25 +55,18 @@ public class VFSAdaptor30 implements VFSAdaptor {
     @Override
     public VirtualFile toVirtualFile(URI uri) throws IOException {
         org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(uri);
-        VirtualFileAdaptor30 absFile = (VirtualFileAdaptor30) adapt(vfsFile);
-        return absFile;
+        return (VirtualFileAdaptor30) adapt(vfsFile);
     }
 
     @Override
     public VirtualFile toVirtualFile(String name, InputStream inputStream) throws IOException {
-        if (inputStream == null)
-            return null;
+        return new VirtualFileAdaptor30(name, inputStream);
+    }
 
-        String internalName = name.replace('/', '-');
-        if (File.separatorChar == '\\')
-            // On Windows we normally use forward slashes internally, but this
-            // file name could
-            // potentially contain backward slashes too
-            internalName = internalName.replace('\\', '-');
-
-        org.jboss.vfs.VirtualFile vfsFile = VFS.getChild(internalName + "-" + System.currentTimeMillis());
-        VirtualFile absFile = new VirtualFileAdaptor30(vfsFile, inputStream);
-        return absFile;
+    @Override
+    public VirtualFile toVirtualFile(InputStream inputStream) throws IOException {
+        String name = "stream" + System.currentTimeMillis();
+        return new VirtualFileAdaptor30(name, inputStream);
     }
 
     @Override

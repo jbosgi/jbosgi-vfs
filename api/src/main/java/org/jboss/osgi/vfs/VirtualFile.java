@@ -42,6 +42,11 @@ import java.util.List;
 public interface VirtualFile extends Closeable {
 
     /**
+     * System property to enable detection of unclosed virtual files 
+     */
+    final String PROPERTY_VFS_LEAK_DEBUGGING = "jboss.osgi.vfs.leakDebugging";
+
+    /**
      * Get the simple VF name (X.java)
      * 
      * @return the simple file name

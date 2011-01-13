@@ -27,7 +27,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.AccessController;
 import java.security.CodeSigner;
+import java.security.PrivilegedAction;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +56,7 @@ import org.jboss.vfs.VirtualJarInputStream;
 class VirtualFileAdaptor30 implements VirtualFile {
 
     private final org.jboss.vfs.VirtualFile vfsFile;
+    private RuntimeException leakDebuggingStack;
     private Closeable mount;
     private TempDir streamDir;
     private File streamFile;
@@ -62,6 +65,19 @@ class VirtualFileAdaptor30 implements VirtualFile {
     static {
         suffixes.add(".jar");
         suffixes.add(".war");
+    }
+
+    private static boolean LEAK_DEBUGGING;
+    static {
+        if (System.getSecurityManager() != null) {
+            LEAK_DEBUGGING = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+                public Boolean run() {
+                    return "true".equals(System.getProperty(PROPERTY_VFS_LEAK_DEBUGGING));
+                }
+            });
+        } else {
+            LEAK_DEBUGGING = "true".equals(System.getProperty(PROPERTY_VFS_LEAK_DEBUGGING));
+        }
     }
 
     private static final TempFileProvider tmpProvider;
@@ -86,8 +102,10 @@ class VirtualFileAdaptor30 implements VirtualFile {
         Runtime.getRuntime().addShutdownHook(shutdownThread);
     }
 
-    VirtualFileAdaptor30(org.jboss.vfs.VirtualFile vfsFile, InputStream input) throws IOException {
-        this(vfsFile);
+    VirtualFileAdaptor30(String name, InputStream input) throws IOException {
+        this(VFS.getChild(name));
+        if (input == null)
+            throw new IllegalStateException("Null input");
         mount = VFS.mountZip(input, vfsFile.getName(), vfsFile, tmpProvider);
     }
 
@@ -95,6 +113,15 @@ class VirtualFileAdaptor30 implements VirtualFile {
         if (vfsFile == null)
             throw new IllegalStateException("Null vfsFile");
         this.vfsFile = vfsFile;
+        if (LEAK_DEBUGGING == true)
+            this.leakDebuggingStack = new RuntimeException("File created in this stack frame not closed");
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        if (mount != null && leakDebuggingStack != null) {
+            leakDebuggingStack.printStackTrace(System.err);
+        }
     }
 
     public org.jboss.vfs.VirtualFile getVirtualFile() {
@@ -238,6 +265,8 @@ class VirtualFileAdaptor30 implements VirtualFile {
     @Override
     public void close() {
         VFSUtils.safeClose(mount);
+        leakDebuggingStack = null;
+        mount = null;
         VFSAdaptor30.unregister(this);
         if (streamFile != null) {
             File streamParent = streamFile.getParentFile();

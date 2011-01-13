@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,7 +58,7 @@ import org.osgi.framework.Constants;
  */
 public class SimpleVFS30TestCase {
 
-    private static File fileArchive;
+    private static File file;
 
     @BeforeClass
     public static void beforeClass() throws IOException {
@@ -74,16 +75,100 @@ public class SimpleVFS30TestCase {
                 }
             }
         });
-        fileArchive = toFile(archive);
+        file = toFile(archive);
     }
 
     @Test
-    public void testVirtualFileFromURL() throws Exception {
-        VirtualFile virtualFile = AbstractVFS.toVirtualFile(fileArchive.toURI().toURL());
+    public void testFromURL() throws Exception {
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile(file.toURI().toURL());
         try
         {
             VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
-            assertNotNull("Manifest not null", child);
+            assertEquals(file.getAbsolutePath() + "/" + JarFile.MANIFEST_NAME, child.getPathName());
+        }
+        finally
+        {
+            virtualFile.close();
+        }
+    }
+    
+    @Test
+    public void testFromURI() throws Exception {
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile(file.toURI());
+        try
+        {
+            VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
+            assertEquals(file.getAbsolutePath() + "/" + JarFile.MANIFEST_NAME, child.getPathName());
+        }
+        finally
+        {
+            virtualFile.close();
+        }
+    }
+    
+    @Test
+    public void testFromStream() throws Exception {
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile("foo", new FileInputStream(file));
+        try
+        {
+            VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
+            assertEquals("/foo/" + JarFile.MANIFEST_NAME, child.getPathName());
+        }
+        finally
+        {
+            virtualFile.close();
+        }
+    }
+    
+    @Test
+    public void testFromStream2() throws Exception {
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile("/foo", new FileInputStream(file));
+        try
+        {
+            VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
+            assertEquals("/foo/" + JarFile.MANIFEST_NAME, child.getPathName());
+        }
+        finally
+        {
+            virtualFile.close();
+        }
+    }
+    
+    @Test
+    public void testFromStream3() throws Exception {
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile("/foo/", new FileInputStream(file));
+        try
+        {
+            VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
+            assertEquals("/foo/" + JarFile.MANIFEST_NAME, child.getPathName());
+        }
+        finally
+        {
+            virtualFile.close();
+        }
+    }
+    
+    @Test
+    public void testFromStream4() throws Exception {
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile("/foo/bar", new FileInputStream(file));
+        try
+        {
+            VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
+            assertEquals("/foo/bar/" + JarFile.MANIFEST_NAME, child.getPathName());
+        }
+        finally
+        {
+            virtualFile.close();
+        }
+    }
+    
+    @Test
+    public void testFromStream5() throws Exception {
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile("file://foo/bar", new FileInputStream(file));
+        try
+        {
+            VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
+            assertEquals("/file:/foo/bar/" + JarFile.MANIFEST_NAME, child.getPathName());
         }
         finally
         {
@@ -93,7 +178,7 @@ public class SimpleVFS30TestCase {
     
     @Test
     public void testManifestAccess() throws Exception {
-        VirtualFile virtualFile = AbstractVFS.toVirtualFile(fileArchive.toURI());
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile(file.toURI());
         try
         {
             VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
@@ -113,7 +198,7 @@ public class SimpleVFS30TestCase {
 
     @Test
     public void testManifestURLAccess() throws Exception {
-        VirtualFile virtualFile = AbstractVFS.toVirtualFile(fileArchive.toURI());
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile(file.toURI());
         try
         {
             VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
@@ -136,7 +221,7 @@ public class SimpleVFS30TestCase {
 
     @Test
     public void testGetEntryPaths() throws Exception {
-        VirtualFile virtualFile = AbstractVFS.toVirtualFile(fileArchive.toURI());
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile(file.toURI());
         try
         {
             Set<String> actual = new HashSet<String>();
@@ -164,7 +249,7 @@ public class SimpleVFS30TestCase {
 
     @Test
     public void testFindEntries() throws Exception {
-        VirtualFile virtualFile = AbstractVFS.toVirtualFile(fileArchive.toURI());
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile(file.toURI());
         try
         {
             Set<String> actual = new HashSet<String>();
@@ -185,7 +270,7 @@ public class SimpleVFS30TestCase {
 
     @Test
     public void testStreamURLAccess() throws Exception {
-        VirtualFile virtualFile = AbstractVFS.toVirtualFile(fileArchive.toURI());
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile(file.toURI());
         try
         {
             URL streamURL = virtualFile.getStreamURL();
@@ -203,7 +288,7 @@ public class SimpleVFS30TestCase {
 
     @Test
     public void testStreamAccess() throws Exception {
-        VirtualFile virtualFile = AbstractVFS.toVirtualFile(fileArchive.toURI());
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile(file.toURI());
         try
         {
             InputStream instream = virtualFile.openStream();

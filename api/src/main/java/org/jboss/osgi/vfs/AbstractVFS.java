@@ -46,10 +46,14 @@ public abstract class AbstractVFS {
         return getVFSAdaptor().toVirtualFile(url);
     }
 
-    public static VirtualFile toVirtualFile(String name, InputStream inputStream) throws IOException {
-        return getVFSAdaptor().toVirtualFile(name, inputStream);
+    public static VirtualFile toVirtualFile(String name, InputStream input) throws IOException {
+        return getVFSAdaptor().toVirtualFile(name, input);
     }
 
+    public static VirtualFile toVirtualFile(InputStream input) throws IOException {
+        return getVFSAdaptor().toVirtualFile(input);
+    }
+    
     public static VirtualFile adapt(Object virtualFile) throws IOException {
         return getVFSAdaptor().adapt(virtualFile);
     }

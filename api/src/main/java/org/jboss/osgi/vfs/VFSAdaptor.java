@@ -55,15 +55,24 @@ public interface VFSAdaptor {
     VirtualFile toVirtualFile(URI uri) throws IOException;
 
     /**
-     * Adapt an InputStream to a virtual file.
+     * Adapt an named InputStream to a virtual file.
      * 
      * @param name The name of the virtual file
-     * @param inputStream The input stream
+     * @param input The input stream
      * @return The VirtualFile abstraction
      * @throws IOException if there is a problem accessing the VFS
      */
-    VirtualFile toVirtualFile(String name, InputStream inputStream) throws IOException;
+    VirtualFile toVirtualFile(String name, InputStream input) throws IOException;
 
+    /**
+     * Adapt an InputStream to a virtual file.
+     * 
+     * @param input The input stream
+     * @return The VirtualFile abstraction
+     * @throws IOException if there is a problem accessing the VFS
+     */
+    VirtualFile toVirtualFile(InputStream input) throws IOException;
+    
     /**
      * Adapt a concrete instance of a jboss-vfs VirtualFile.
      * 
