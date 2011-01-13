@@ -104,13 +104,15 @@ class VirtualFileAdaptor30 implements VirtualFile {
         this(VFS.getChild(name));
         if (input == null)
             throw new IllegalStateException("Null input");
-        mount = mountVirtualFile(input);
+        mount = VFS.mountZip(input, vfsFile.getName(), vfsFile, tmpProvider);
     }
 
     VirtualFileAdaptor30(org.jboss.vfs.VirtualFile vfsFile) {
         if (vfsFile == null)
             throw new IllegalStateException("Null vfsFile");
         this.vfsFile = vfsFile;
+        if (LEAK_DEBUGGING == true)
+            leakDebuggingStack = new IOException("VirtualFile created in this stack frame not closed: " + vfsFile);
     }
 
     @Override
@@ -287,24 +289,6 @@ class VirtualFileAdaptor30 implements VirtualFile {
         return accept;
     }
 
-    private void ensureMounted() throws IOException {
-        if (mount == null && acceptForMount()) {
-            mount = mountVirtualFile(null);
-        }
-    }
-
-    public Closeable mountVirtualFile(InputStream input) throws IOException {
-        Closeable mount;
-        if (input != null) {
-            mount = VFS.mountZip(input, vfsFile.getName(), vfsFile, tmpProvider);
-        } else {
-            mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
-        }
-        if (LEAK_DEBUGGING == true)
-            this.leakDebuggingStack = new IOException("VirtualFile created in this stack frame not closed");
-        return mount;
-    }
-
     private org.jboss.vfs.VirtualFile getMountedChild(String path) throws IOException {
         ensureMounted();
         return vfsFile.getChild(path);
@@ -318,6 +302,12 @@ class VirtualFileAdaptor30 implements VirtualFile {
     private List<org.jboss.vfs.VirtualFile> getMountedChildrenRecursively() throws IOException {
         ensureMounted();
         return vfsFile.getChildrenRecursively();
+    }
+
+    private void ensureMounted() throws IOException {
+        if (mount == null && acceptForMount()) {
+            mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
+        }
     }
 
     @Override
