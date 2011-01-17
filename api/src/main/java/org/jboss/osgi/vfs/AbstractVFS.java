@@ -28,9 +28,9 @@ import java.net.URL;
 
 /**
  * The AbstractVFS is the entry point for VFS abstraction used by the OSGi layer.
- * 
+ *
  * This abstraction should be removed once we settle on a single jboss-vfs version.
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
@@ -53,8 +53,8 @@ public abstract class AbstractVFS {
     public static VirtualFile toVirtualFile(InputStream input) throws IOException {
         return getVFSAdaptor().toVirtualFile(input);
     }
-    
-    public static VirtualFile adapt(Object virtualFile) throws IOException {
+
+    public static VirtualFile adapt(Object virtualFile) {
         return getVFSAdaptor().adapt(virtualFile);
     }
 

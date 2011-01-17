@@ -28,9 +28,9 @@ import java.net.URL;
 
 /**
  * The basic adaptor for the VFS that needs to be implemented for a specific jboss-vfs version.
- * 
+ *
  * This abstraction should be removed once we settle on a single jboss-vfs version.
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
@@ -38,7 +38,7 @@ public interface VFSAdaptor {
 
     /**
      * Get the root virtual file
-     * 
+     *
      * @param url the root url
      * @return the virtual file
      * @throws IOException if there is a problem accessing the VFS
@@ -47,7 +47,7 @@ public interface VFSAdaptor {
 
     /**
      * Get the root virtual file
-     * 
+     *
      * @param uri the root uri
      * @return the virtual file
      * @throws IOException if there is a problem accessing the VFS
@@ -56,7 +56,7 @@ public interface VFSAdaptor {
 
     /**
      * Adapt an named InputStream to a virtual file.
-     * 
+     *
      * @param name The name of the virtual file
      * @param input The input stream
      * @return The VirtualFile abstraction
@@ -66,27 +66,27 @@ public interface VFSAdaptor {
 
     /**
      * Adapt an InputStream to a virtual file.
-     * 
+     *
      * @param input The input stream
      * @return The VirtualFile abstraction
      * @throws IOException if there is a problem accessing the VFS
      */
     VirtualFile toVirtualFile(InputStream input) throws IOException;
-    
+
     /**
      * Adapt a concrete instance of a jboss-vfs VirtualFile.
-     * 
+     *
      * @param virtualFile The VirtualFile instance
      * @return The VirtualFile abstraction
      * @throws IllegalArgumentException If the given virtualFile is not a VirtualFile supported by the VFSAdaptor implementation
      */
-    VirtualFile adapt(Object virtualFile) throws IOException;
+    VirtualFile adapt(Object virtualFile);
 
     /**
      * Adapt a VirtualFile to a concrete instance of a jboss-vfs VirtualFile.
-     * 
+     *
      * @param virtualFile The VirtualFile instance
      * @return The jboss-vfs VirtualFile
      */
-    Object adapt(VirtualFile virtualFile) throws IOException;
+    Object adapt(VirtualFile virtualFile);
 }

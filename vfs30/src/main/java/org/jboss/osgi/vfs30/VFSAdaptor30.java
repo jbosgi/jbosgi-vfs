@@ -35,7 +35,7 @@ import org.jboss.vfs.VFS;
 
 /**
  * An adaptor to the jboss-vfs-3.0.x VFS.
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
@@ -70,7 +70,7 @@ public final class VFSAdaptor30 implements VFSAdaptor {
     }
 
     @Override
-    public VirtualFile adapt(Object other) throws IOException {
+    public VirtualFile adapt(Object other) {
         if (other == null)
             return null;
 
