@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.jboss.osgi.vfs</groupId>
     <artifactId>jbosgi-vfs-parent</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.5</version>
   </parent>
 
   <!-- Dependencies -->
