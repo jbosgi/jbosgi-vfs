@@ -34,6 +34,7 @@ import org.jboss.vfs.VirtualFile;
  * 
  * @author <a href="adrian@jboss.com">Adrian Brock</a>
  * @author thomas.diesler@jboss.com
+ * @author <a href="david@redhat.com">David Bosschaert</a>
  * @version $Revision: 1.1 $
  */
 class VFSEntryPathsEnumeration implements Enumeration<String> {
@@ -43,7 +44,7 @@ class VFSEntryPathsEnumeration implements Enumeration<String> {
 
     /**
      * Create a new VFSEntryPathsEnumeration.
-     * 
+     *
      * @param root the root file
      * @param file the file to enumerate
      * @throws IOException for any error
@@ -57,13 +58,9 @@ class VFSEntryPathsEnumeration implements Enumeration<String> {
         String rootPath = root.getPathName();
         ArrayList<String> paths = new ArrayList<String>();
 
-        String fixedPath = fixPath(rootPath, file);
-        if (fixedPath != null)
-            paths.add(fixedPath);
-
-        List<VirtualFile> children = file.getChildrenRecursively();
+        List<VirtualFile> children = file.getChildren();
         for (VirtualFile child : children) {
-            fixedPath = fixPath(rootPath, child);
+            String fixedPath = fixPath(rootPath, child);
             if (fixedPath != null)
                 paths.add(fixedPath);
         }
