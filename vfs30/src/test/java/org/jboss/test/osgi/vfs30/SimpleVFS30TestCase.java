@@ -86,12 +86,12 @@ public class SimpleVFS30TestCase {
 
     private static void createExample2() throws IOException {
         JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example2.jar");
-        archive.addResource(getAsset("file1"), "file1.txt");
-        archive.addResource(getAsset("file2"), "file2.txt");
-        archive.addResource(getAsset("file3"), "sub/file3.txt");
-        archive.addResource(getAsset("file4"), "sub/file4.txt");
-        archive.addResource(getAsset("file5"), "sub/sub/file5.txt");
-        archive.addResource(getAsset("file6"), "sub/sub1/file6.txt");
+        archive.addAsResource(getAsset("file1"), "file1.txt");
+        archive.addAsResource(getAsset("file2"), "file2.txt");
+        archive.addAsResource(getAsset("file3"), "sub/file3.txt");
+        archive.addAsResource(getAsset("file4"), "sub/file4.txt");
+        archive.addAsResource(getAsset("file5"), "sub/sub/file5.txt");
+        archive.addAsResource(getAsset("file6"), "sub/sub1/file6.txt");
         file2 = toFile(archive);
     }
 
@@ -304,7 +304,7 @@ public class SimpleVFS30TestCase {
 
     private static File toFile(JavaArchive archive) throws IOException {
         ZipExporter exporter = archive.as(ZipExporter.class);
-        InputStream inputStream = exporter.exportZip();
+        InputStream inputStream = exporter.exportAsInputStream();
         File file = new File("target/" + archive.getName());
         VFSUtils.copyStream(inputStream, new FileOutputStream(file));
         return file;

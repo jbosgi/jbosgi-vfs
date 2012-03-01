@@ -34,7 +34,6 @@
 
   <!-- Properties -->
   <properties>
-    <version.jboss.vfs>3.0.0.CR5</version.jboss.vfs>
   </properties>
   
   <!-- Dependencies -->
@@ -47,7 +46,6 @@
     <dependency>
       <groupId>org.jboss</groupId>
       <artifactId>jboss-vfs</artifactId>
-      <version>${version.jboss.vfs}</version>
     </dependency>
     
     <dependency>
