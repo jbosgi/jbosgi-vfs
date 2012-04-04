@@ -21,6 +21,8 @@
  */
 package org.jboss.osgi.vfs30;
 
+import static org.jboss.osgi.vfs.internal.VFSMessages.MESSAGES;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -85,7 +87,7 @@ class VirtualFileAdaptor30 implements VirtualFile {
         try {
             tmpProvider = TempFileProvider.create("osgitmp-", null);
         } catch (IOException ex) {
-            throw new IllegalStateException("Cannot create VFS temp file provider", ex);
+            throw MESSAGES.illegalStateCannotCreateTempFileProvider(ex);
         }
 
         Thread shutdownThread = new Thread("vfs-shutdown") {
@@ -93,7 +95,7 @@ class VirtualFileAdaptor30 implements VirtualFile {
                 try {
                     tmpProvider.close();
                 } catch (IOException ex) {
-                    throw new IllegalStateException("Cannot close VFS temp file provider", ex);
+                    throw MESSAGES.illegalStateCannotCloseTempFileProvider(ex);
                 }
             }
         };
@@ -103,13 +105,13 @@ class VirtualFileAdaptor30 implements VirtualFile {
     VirtualFileAdaptor30(String name, InputStream input) throws IOException {
         this(VFS.getChild(name));
         if (input == null)
-            throw new IllegalStateException("Null input");
+            throw MESSAGES.illegalArgumentNull("input");
         mount = VFS.mountZip(input, vfsFile.getName(), vfsFile, tmpProvider);
     }
 
     VirtualFileAdaptor30(org.jboss.vfs.VirtualFile vfsFile) {
         if (vfsFile == null)
-            throw new IllegalStateException("Null vfsFile");
+            throw MESSAGES.illegalArgumentNull("file");
         this.vfsFile = vfsFile;
         if (LEAK_DEBUGGING == true)
             leakDebuggingStack = new IOException("VirtualFile created in this stack frame not closed: " + vfsFile);
@@ -205,7 +207,7 @@ class VirtualFileAdaptor30 implements VirtualFile {
     @Override
     public Enumeration<URL> findEntries(String path, String pattern, boolean recurse) throws IOException {
         if (path == null)
-            throw new IllegalArgumentException("Null path");
+            throw MESSAGES.illegalArgumentNull("path");
 
         if (pattern == null)
             pattern = "*";
@@ -223,7 +225,7 @@ class VirtualFileAdaptor30 implements VirtualFile {
     @Override
     public Enumeration<String> getEntryPaths(String path) throws IOException {
         if (path == null)
-            throw new IllegalArgumentException("Null path");
+            throw MESSAGES.illegalArgumentNull("path");
 
         if (path.startsWith("/"))
             path = path.substring(1);

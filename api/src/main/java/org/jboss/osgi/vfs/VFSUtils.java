@@ -21,14 +21,15 @@
  */
 package org.jboss.osgi.vfs;
 
+import static org.jboss.osgi.vfs.internal.VFSLogger.LOGGER;
+import static org.jboss.osgi.vfs.internal.VFSMessages.MESSAGES;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-
-import org.jboss.logging.Logger;
 
 /**
  * Some VFS utilities that are used by the OSGi layer.
@@ -38,16 +39,13 @@ import org.jboss.logging.Logger;
  */
 public final class VFSUtils {
 
-    // Provide logging
-    private static final Logger log = Logger.getLogger(VFSUtils.class);
-
     // Hide ctor
     private VFSUtils() {
     }
 
     public static Manifest getManifest(VirtualFile archive) throws IOException {
         if (archive == null)
-            throw new IllegalArgumentException("Null archive");
+            throw MESSAGES.illegalArgumentNull("archive");
 
         VirtualFile manifest = archive.getChild(JarFile.MANIFEST_NAME);
         if (manifest == null)
@@ -66,9 +64,9 @@ public final class VFSUtils {
 
     public static void copyStream(InputStream is, OutputStream os) throws IOException {
         if (is == null)
-            throw new IllegalArgumentException("input stream is null");
+            throw MESSAGES.illegalArgumentNull("input");
         if (os == null)
-            throw new IllegalArgumentException("output stream is null");
+            throw MESSAGES.illegalArgumentNull("output");
 
         try {
             byte[] buff = new byte[65536];
@@ -83,14 +81,15 @@ public final class VFSUtils {
     }
 
     /**
-     * Safely close some resource without throwing an exception. Any exception will be logged at TRACE level.
+     * Safely close some resource without throwing an exception. 
+     * Any exception will be logged at TRACE level.
      */
     public static void safeClose(Closeable c) {
         try {
             if (c != null)
                 c.close();
         } catch (Exception ex) {
-            log.trace("Failed to close resource", ex);
+            LOGGER.tracef(ex, "Failed to close resource");
         }
     }
 

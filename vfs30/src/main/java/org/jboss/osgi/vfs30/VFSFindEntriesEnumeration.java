@@ -21,6 +21,8 @@
  */
 package org.jboss.osgi.vfs30;
 
+import static org.jboss.osgi.vfs.internal.VFSMessages.MESSAGES;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -58,9 +60,9 @@ class VFSFindEntriesEnumeration implements Enumeration<URL> {
      */
     public VFSFindEntriesEnumeration(VirtualFile root, VirtualFile file, String filePattern, boolean recurse) throws IOException {
         if (root == null)
-            throw new IllegalArgumentException("Null root");
+            throw MESSAGES.illegalArgumentNull("root");
         if (file == null)
-            throw new IllegalArgumentException("Null file");
+            throw MESSAGES.illegalArgumentNull("file");
 
         String rootPath = root.getPathName();
         VisitorAttributes attributes = new VisitorAttributes();
@@ -110,7 +112,7 @@ class VFSFindEntriesEnumeration implements Enumeration<URL> {
             try {
                 paths.add(virtualFile.toURL());
             } catch (Exception e) {
-                throw new RuntimeException("Error visiting " + virtualFile, e);
+                throw MESSAGES.runtimeErrorVistingFile(e, virtualFile);
             }
         }
 

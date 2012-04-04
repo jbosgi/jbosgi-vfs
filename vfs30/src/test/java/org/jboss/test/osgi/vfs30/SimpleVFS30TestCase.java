@@ -63,11 +63,11 @@ public class SimpleVFS30TestCase {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-        createExampleSimple();
-        createExample2();
+        createArchiveA();
+        createArchiveB();
     }
 
-    private static void createExampleSimple() throws IOException {
+    private static void createArchiveA() throws IOException {
         JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-simple.jar");
         archive.addClass(SimpleActivator.class);
         archive.setManifest(new Asset() {
@@ -77,14 +77,14 @@ public class SimpleVFS30TestCase {
                     URL manifest = getClass().getResource(path);
                     return manifest.openStream();
                 } catch (IOException ex) {
-                    throw new IllegalStateException("Cannot open stream for: " + path, ex);
+                    throw new RuntimeException(ex);
                 }
             }
         });
         file = toFile(archive);
     }
 
-    private static void createExample2() throws IOException {
+    private static void createArchiveB() throws IOException {
         JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example2.jar");
         archive.addAsResource(getAsset("file1"), "file1.txt");
         archive.addAsResource(getAsset("file2"), "file2.txt");

@@ -21,6 +21,8 @@
  */
 package org.jboss.osgi.vfs30;
 
+import static org.jboss.osgi.vfs.internal.VFSMessages.MESSAGES;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -51,9 +53,9 @@ class VFSEntryPathsEnumeration implements Enumeration<String> {
      */
     public VFSEntryPathsEnumeration(VirtualFile root, VirtualFile file) throws IOException {
         if (root == null)
-            throw new IllegalArgumentException("Null root");
+            throw MESSAGES.illegalArgumentNull("root");
         if (file == null)
-            throw new IllegalArgumentException("Null file");
+            throw MESSAGES.illegalArgumentNull("file");
 
         String rootPath = root.getPathName();
         ArrayList<String> paths = new ArrayList<String>();

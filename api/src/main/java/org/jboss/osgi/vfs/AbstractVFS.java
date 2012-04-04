@@ -21,6 +21,8 @@
  */
 package org.jboss.osgi.vfs;
 
+import static org.jboss.osgi.vfs.internal.VFSMessages.MESSAGES;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -76,12 +78,12 @@ public abstract class AbstractVFS {
             }
 
             if (adaptorClass == null)
-                throw new IllegalStateException("Cannot load VFS adaptor");
+                throw MESSAGES.illegalStateCannotLoadAdaptor();
 
             try {
                 adaptor = adaptorClass.newInstance();
             } catch (Exception ex) {
-                throw new IllegalStateException("Cannot instanciate VFS adaptor");
+                throw MESSAGES.illegalStateCannotCreateAdaptor(ex);
             }
         }
         return adaptor;

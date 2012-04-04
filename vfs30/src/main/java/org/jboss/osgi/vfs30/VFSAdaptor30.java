@@ -21,6 +21,8 @@
  */
 package org.jboss.osgi.vfs30;
 
+import static org.jboss.osgi.vfs.internal.VFSMessages.MESSAGES;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -75,7 +77,7 @@ public final class VFSAdaptor30 implements VFSAdaptor {
             return null;
 
         if (other instanceof org.jboss.vfs.VirtualFile == false)
-            throw new IllegalArgumentException("Not a org.jboss.vfs.VirtualFile: " + other);
+            throw MESSAGES.illegalArgumentNoVirtualFile(other);
 
         org.jboss.vfs.VirtualFile vfsFile = (org.jboss.vfs.VirtualFile) other;
         VirtualFile absFile = registry.get(other);
