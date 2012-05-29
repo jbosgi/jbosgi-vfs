@@ -5,16 +5,16 @@
  * Copyright (C) 2010 - 2012 JBoss by Red Hat
  * %%
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 2.1 of the 
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 2.1 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public 
+ *
+ * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
@@ -57,9 +57,7 @@ import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
@@ -72,7 +70,7 @@ import org.jboss.vfs.VirtualJarInputStream;
 
 /**
  * An adaptor to the jboss-vfs-3.0.x VirtualFile.
- * 
+ *
  * @author thomas.diesler@jboss.com
  * @since 02-Mar-2010
  */
@@ -83,12 +81,6 @@ class VirtualFileAdaptor30 implements VirtualFile {
     private Closeable mount;
     private TempDir streamDir;
     private File streamFile;
-
-    private static Set<String> suffixes = new HashSet<String>();
-    static {
-        suffixes.add(".jar");
-        suffixes.add(".war");
-    }
 
     private static boolean LEAK_DEBUGGING;
     static {
@@ -298,18 +290,7 @@ class VirtualFileAdaptor30 implements VirtualFile {
     }
 
     private boolean acceptForMount() {
-        if (vfsFile.isDirectory())
-            return false;
-
-        boolean accept = false;
-        String rootName = vfsFile.getName();
-        for (String suffix : suffixes) {
-            if (rootName.endsWith(suffix)) {
-                accept = true;
-                break;
-            }
-        }
-        return accept;
+        return !vfsFile.isDirectory();
     }
 
     private org.jboss.vfs.VirtualFile getMountedChild(String path) throws IOException {
