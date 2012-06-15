@@ -42,6 +42,7 @@
  */
 package org.jboss.osgi.vfs30;
 
+import static org.jboss.osgi.vfs.internal.VFSLogger.LOGGER;
 import static org.jboss.osgi.vfs.internal.VFSMessages.MESSAGES;
 
 import java.io.Closeable;
@@ -195,10 +196,9 @@ class VirtualFileAdaptor30 implements VirtualFile {
     @Override
     public VirtualFile getChild(String path) throws IOException {
         org.jboss.vfs.VirtualFile child = getMountedChild(path);
-        if (child.exists() == false)
-            return null;
-
-        return new VirtualFileAdaptor30(child);
+        boolean exists = child != null && child.exists();
+        LOGGER.tracef("getChild: %s => %s (%s)", path, child, exists);
+        return exists ? new VirtualFileAdaptor30(child) : null;
     }
 
     @Override
@@ -290,7 +290,9 @@ class VirtualFileAdaptor30 implements VirtualFile {
     }
 
     private boolean acceptForMount() {
-        return !vfsFile.isDirectory();
+        boolean accept = !vfsFile.isDirectory();
+        LOGGER.tracef("acceptForMount: %s => %s", vfsFile, accept);
+        return accept;
     }
 
     private org.jboss.vfs.VirtualFile getMountedChild(String path) throws IOException {
