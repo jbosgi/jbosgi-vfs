@@ -42,7 +42,7 @@
  */
 package org.jboss.osgi.vfs;
 
-import static org.jboss.osgi.vfs.internal.VFSMessages.MESSAGES;
+import static org.jboss.osgi.vfs.VFSMessages.MESSAGES;
 
 import java.io.IOException;
 import java.io.InputStream;

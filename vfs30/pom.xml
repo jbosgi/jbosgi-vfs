@@ -21,7 +21,6 @@
   <name>JBossOSGi VFS VFS30</name>
   <description>The JBossOSGi VFS Abstration</description>
   
-  <groupId>org.jboss.osgi.vfs</groupId>
   <artifactId>jbosgi-vfs30</artifactId>
   <packaging>jar</packaging>
   
@@ -29,7 +28,7 @@
   <parent>
     <groupId>org.jboss.osgi.vfs</groupId>
     <artifactId>jbosgi-vfs-parent</artifactId>
-    <version>1.1.2.CR2-SNAPSHOT</version>
+    <version>2.0.0.Alpha1-SNAPSHOT</version>
   </parent>
 
   <!-- Properties -->

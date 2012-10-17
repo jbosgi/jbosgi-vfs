@@ -41,11 +41,11 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.osgi.vfs.internal;
+package org.jboss.osgi.vfs;
 
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Logger;
-import org.jboss.logging.MessageLogger;
+import org.jboss.logging.annotations.MessageLogger;
 
 /**
  * Logging Id ranges: 10000-10099

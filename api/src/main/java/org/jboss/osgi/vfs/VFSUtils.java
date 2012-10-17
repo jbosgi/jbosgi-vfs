@@ -42,8 +42,8 @@
  */
 package org.jboss.osgi.vfs;
 
-import static org.jboss.osgi.vfs.internal.VFSLogger.LOGGER;
-import static org.jboss.osgi.vfs.internal.VFSMessages.MESSAGES;
+import static org.jboss.osgi.vfs.VFSLogger.LOGGER;
+import static org.jboss.osgi.vfs.VFSMessages.MESSAGES;
 
 import java.io.Closeable;
 import java.io.IOException;
