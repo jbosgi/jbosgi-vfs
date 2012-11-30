@@ -100,14 +100,16 @@ public final class VFSAdaptor30 implements VFSAdaptor {
         if (other instanceof org.jboss.vfs.VirtualFile == false)
             throw MESSAGES.illegalArgumentNoVirtualFile(other);
 
-        org.jboss.vfs.VirtualFile vfsFile = (org.jboss.vfs.VirtualFile) other;
-        VirtualFile absFile = registry.get(other);
-        if (absFile != null)
-            return absFile;
-
-        // Register the VirtualFile abstraction
-        absFile = new VirtualFileAdaptor30(vfsFile);
-        registry.put(vfsFile, absFile);
+        VirtualFile absFile;
+        synchronized (registry) {
+            org.jboss.vfs.VirtualFile vfsFile = (org.jboss.vfs.VirtualFile) other;
+            absFile = registry.get(other);
+            if (absFile == null) {
+                // Register the VirtualFile abstraction
+                absFile = new VirtualFileAdaptor30(vfsFile);
+                registry.put(vfsFile, absFile);
+            }
+        }
         return absFile;
     }
 
@@ -121,6 +123,8 @@ public final class VFSAdaptor30 implements VFSAdaptor {
     }
 
     static void unregister(VirtualFileAdaptor30 absFile) {
-        registry.remove(absFile.getVirtualFile());
+        synchronized (registry) {
+            registry.remove(absFile.getVirtualFile());
+        }
     }
 }

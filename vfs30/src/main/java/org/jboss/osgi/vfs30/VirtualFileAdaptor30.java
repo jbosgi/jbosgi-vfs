@@ -169,20 +169,22 @@ class VirtualFileAdaptor30 implements VirtualFile {
         if (vfsFile.isFile() == true)
             return vfsFile.toURL();
 
-        if (streamFile == null) {
-            streamDir = tmpProvider.createTempDir("urlstream");
-            streamFile = streamDir.getFile(getName());
+        synchronized (this) {
+            if (streamFile == null) {
+                streamDir = tmpProvider.createTempDir("urlstream");
+                streamFile = streamDir.getFile(getName());
 
-            JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(streamFile));
-            VirtualJarInputStream jarIn = (VirtualJarInputStream) vfsFile.openStream();
-            ZipEntry nextEntry = jarIn.getNextEntry();
-            while (nextEntry != null) {
-                jarOut.putNextEntry(nextEntry);
-                VFSUtils.copyStream(jarIn, jarOut);
-                nextEntry = jarIn.getNextEntry();
+                JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(streamFile));
+                VirtualJarInputStream jarIn = (VirtualJarInputStream) vfsFile.openStream();
+                ZipEntry nextEntry = jarIn.getNextEntry();
+                while (nextEntry != null) {
+                    jarOut.putNextEntry(nextEntry);
+                    VFSUtils.copyStream(jarIn, jarOut);
+                    nextEntry = jarIn.getNextEntry();
+                }
+                jarOut.close();
+                jarIn.close();
             }
-            jarOut.close();
-            jarIn.close();
         }
         return streamFile.toURI().toURL();
     }
@@ -277,15 +279,17 @@ class VirtualFileAdaptor30 implements VirtualFile {
 
     @Override
     public void close() {
-        VFSUtils.safeClose(mount);
-        leakDebuggingStack = null;
-        mount = null;
-        VFSAdaptor30.unregister(this);
-        if (streamFile != null) {
-            File streamParent = streamFile.getParentFile();
-            streamFile.delete();
-            streamParent.delete();
-            streamFile = null;
+        synchronized (this) {
+            VFSUtils.safeClose(mount);
+            leakDebuggingStack = null;
+            mount = null;
+            VFSAdaptor30.unregister(this);
+            if (streamFile != null) {
+                File streamParent = streamFile.getParentFile();
+                streamFile.delete();
+                streamParent.delete();
+                streamFile = null;
+            }
         }
     }
 
@@ -311,8 +315,10 @@ class VirtualFileAdaptor30 implements VirtualFile {
     }
 
     private void ensureMounted() throws IOException {
-        if (mount == null && acceptForMount()) {
-            mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
+        synchronized (this) {
+            if (mount == null && acceptForMount()) {
+                mount = VFS.mountZip(vfsFile, vfsFile, tmpProvider);
+            }
         }
     }
 
