@@ -89,7 +89,10 @@ public class SimpleVFS30TestCase {
     }
 
     private static void createArchiveA() throws IOException {
-        JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-simple.jar");
+        JavaArchive archive =
+                ShrinkWrap.create(JavaArchive.class, "example simple with "
+                        + "\u0441\u043F\u0435\u0446\u0438\u0430\u043B\u0438\u0437"
+                        + "\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u043C\u0438.jar");
         archive.addClass(SimpleActivator.class);
         archive.setManifest(new Asset() {
             public InputStream openStream() {
@@ -119,6 +122,17 @@ public class SimpleVFS30TestCase {
     @Test
     public void testFromURL() throws Exception {
         VirtualFile virtualFile = AbstractVFS.toVirtualFile(file.toURI().toURL());
+        try {
+            VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
+            assertEquals(file.getAbsolutePath() + "/" + JarFile.MANIFEST_NAME, child.getPathName());
+        } finally {
+            virtualFile.close();
+        }
+    }
+
+    @Test
+    public void testUnescapedURL() throws Exception {
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile(new URL("file://" + file.getAbsolutePath()));
         try {
             VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
             assertEquals(file.getAbsolutePath() + "/" + JarFile.MANIFEST_NAME, child.getPathName());

@@ -55,6 +55,7 @@ import java.util.WeakHashMap;
 import org.jboss.osgi.vfs.VFSAdaptor;
 import org.jboss.osgi.vfs.VirtualFile;
 import org.jboss.vfs.VFS;
+import org.jboss.vfs.VFSUtils;
 
 /**
  * An adaptor to the jboss-vfs-3.0.x VFS.
@@ -69,7 +70,7 @@ public final class VFSAdaptor30 implements VFSAdaptor {
     @Override
     public VirtualFile toVirtualFile(URL url) throws IOException {
         try {
-            return toVirtualFile(url.toURI());
+            return toVirtualFile(VFSUtils.toURI(url));
         } catch (URISyntaxException ex) {
             throw new IOException(ex);
         }
