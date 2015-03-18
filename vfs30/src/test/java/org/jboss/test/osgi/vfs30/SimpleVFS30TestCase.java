@@ -131,6 +131,17 @@ public class SimpleVFS30TestCase {
     }
 
     @Test
+    public void testUnescapedURL() throws Exception {
+        VirtualFile virtualFile = AbstractVFS.toVirtualFile(new URL("file://" + file.getAbsolutePath()));
+        try {
+            VirtualFile child = virtualFile.getChild(JarFile.MANIFEST_NAME);
+            assertEquals(file.getAbsolutePath() + "/" + JarFile.MANIFEST_NAME, child.getPathName());
+        } finally {
+            virtualFile.close();
+        }
+    }
+
+    @Test
     public void testFromURI() throws Exception {
         VirtualFile virtualFile = AbstractVFS.toVirtualFile(file.toURI());
         try {
@@ -325,7 +336,7 @@ public class SimpleVFS30TestCase {
             virtualFile.close();
         }
     }
-    
+
     private static File toFile(JavaArchive archive) throws IOException {
         ZipExporter exporter = archive.as(ZipExporter.class);
         InputStream inputStream = exporter.exportAsInputStream();
