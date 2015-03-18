@@ -89,7 +89,10 @@ public class SimpleVFS30TestCase {
     }
 
     private static void createArchiveA() throws IOException {
-        JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "example-simple.jar");
+        JavaArchive archive =
+                ShrinkWrap.create(JavaArchive.class, "example simple with "
+                        + "\u0441\u043F\u0435\u0446\u0438\u0430\u043B\u0438\u0437"
+                        + "\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u043C\u0438.jar");
         archive.addClass(SimpleActivator.class);
         archive.setManifest(new Asset() {
             public InputStream openStream() {
@@ -322,7 +325,7 @@ public class SimpleVFS30TestCase {
             virtualFile.close();
         }
     }
-
+    
     private static File toFile(JavaArchive archive) throws IOException {
         ZipExporter exporter = archive.as(ZipExporter.class);
         InputStream inputStream = exporter.exportAsInputStream();
