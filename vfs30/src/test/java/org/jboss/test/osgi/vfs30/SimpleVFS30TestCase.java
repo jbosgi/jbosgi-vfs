@@ -93,7 +93,6 @@ public class SimpleVFS30TestCase {
                 ShrinkWrap.create(JavaArchive.class, "example simple with "
                         + "\u0441\u043F\u0435\u0446\u0438\u0430\u043B\u0438\u0437"
                         + "\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u043C\u0438.jar");
-        archive.addClass(SimpleActivator.class);
         archive.setManifest(new Asset() {
             public InputStream openStream() {
                 String path = "/simple/" + JarFile.MANIFEST_NAME;
@@ -105,6 +104,7 @@ public class SimpleVFS30TestCase {
                 }
             }
         });
+        archive.addClass(SimpleActivator.class);
         file = toFile(archive);
     }
 
