@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>org.jboss.osgi.vfs</groupId>
 		<artifactId>jbosgi-vfs-parent</artifactId>
-		<version>4.0.1.Final</version>
+		<version>4.0.2.Final-SNAPSHOT</version>
 	</parent>
 
 	<name>JBossOSGi VFS API</name>
